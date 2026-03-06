@@ -43,11 +43,11 @@ function getWslWindowsHome(): string | null {
 }
 
 export function resolveXToMarkdownChromeProfileDir(): string {
-  const override = process.env.X_CHROME_PROFILE_DIR?.trim();
+  const override = process.env.BAOYU_CHROME_PROFILE_DIR?.trim() || process.env.X_CHROME_PROFILE_DIR?.trim();
   if (override) return path.resolve(override);
   const wslHome = getWslWindowsHome();
-  if (wslHome) return path.join(wslHome, ".local", "share", APP_DATA_DIR, X_TO_MARKDOWN_DATA_DIR, PROFILE_DIR_NAME);
-  return path.join(resolveXToMarkdownDataDir(), PROFILE_DIR_NAME);
+  if (wslHome) return path.join(wslHome, ".local", "share", APP_DATA_DIR, PROFILE_DIR_NAME);
+  return path.join(resolveUserDataRoot(), APP_DATA_DIR, PROFILE_DIR_NAME);
 }
 
 export function resolveXToMarkdownConsentPath(): string {

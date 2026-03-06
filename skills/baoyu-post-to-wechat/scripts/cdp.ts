@@ -61,8 +61,12 @@ export function findChromeExecutable(): string | undefined {
 }
 
 export function getDefaultProfileDir(): string {
-  const base = process.env.XDG_DATA_HOME || path.join(os.homedir(), '.local', 'share');
-  return path.join(base, 'wechat-browser-profile');
+  const override = process.env.BAOYU_CHROME_PROFILE_DIR?.trim();
+  if (override) return path.resolve(override);
+  const base = process.platform === 'darwin'
+    ? path.join(os.homedir(), 'Library', 'Application Support')
+    : process.env.XDG_DATA_HOME || path.join(os.homedir(), '.local', 'share');
+  return path.join(base, 'baoyu-skills', 'chrome-profile');
 }
 
 async function fetchJson<T = unknown>(url: string): Promise<T> {

@@ -54,10 +54,12 @@ export function findExistingChromeDebugPort(profileDir: string): number | null {
 }
 
 export function getDefaultProfileDir(): string {
-  const override = process.env.WEIBO_BROWSER_PROFILE_DIR?.trim();
+  const override = process.env.BAOYU_CHROME_PROFILE_DIR?.trim() || process.env.WEIBO_BROWSER_PROFILE_DIR?.trim();
   if (override) return path.resolve(override);
-  const base = process.env.XDG_DATA_HOME || path.join(os.homedir(), '.local', 'share');
-  return path.join(base, 'x-browser-profile');
+  const base = process.platform === 'darwin'
+    ? path.join(os.homedir(), 'Library', 'Application Support')
+    : process.env.XDG_DATA_HOME || path.join(os.homedir(), '.local', 'share');
+  return path.join(base, 'baoyu-skills', 'chrome-profile');
 }
 
 export function sleep(ms: number): Promise<void> {

@@ -183,11 +183,14 @@ function getWslWindowsHome(): string | null {
 }
 
 function getDefaultProfileDir(): string {
-  const override = process.env.WECHAT_BROWSER_PROFILE_DIR?.trim();
+  const override = process.env.BAOYU_CHROME_PROFILE_DIR?.trim() || process.env.WECHAT_BROWSER_PROFILE_DIR?.trim();
   if (override) return path.resolve(override);
-  const home = getWslWindowsHome() ?? os.homedir();
-  const base = process.env.XDG_DATA_HOME || path.join(home, '.local', 'share');
-  return path.join(base, 'wechat-browser-profile');
+  const wslHome = getWslWindowsHome();
+  if (wslHome) return path.join(wslHome, '.local', 'share', 'baoyu-skills', 'chrome-profile');
+  const base = process.platform === 'darwin'
+    ? path.join(os.homedir(), 'Library', 'Application Support')
+    : process.env.XDG_DATA_HOME || path.join(os.homedir(), '.local', 'share');
+  return path.join(base, 'baoyu-skills', 'chrome-profile');
 }
 
 async function fetchJson<T = unknown>(url: string): Promise<T> {
