@@ -23,6 +23,20 @@ interface PublishResponse {
   errmsg?: string;
 }
 
+interface ImageInfo {
+  placeholder: string;
+  localPath: string;
+  originalPath: string;
+}
+
+interface MarkdownRenderResult {
+  title: string;
+  author: string;
+  summary: string;
+  htmlPath: string;
+  contentImages: ImageInfo[];
+}
+
 type ArticleType = "news" | "newspic";
 
 interface ArticleOptions {
@@ -143,18 +157,20 @@ async function uploadImage(
 async function uploadImagesInHtml(
   html: string,
   accessToken: string,
-  baseDir: string
+  baseDir: string,
+  contentImages: ImageInfo[] = [],
 ): Promise<{ html: string; firstMediaId: string; allMediaIds: string[] }> {
   const imgRegex = /<img[^>]*\ssrc=["']([^"']+)["'][^>]*>/gi;
   const matches = [...html.matchAll(imgRegex)];
 
-  if (matches.length === 0) {
+  if (matches.length === 0 && contentImages.length === 0) {
     return { html, firstMediaId: "", allMediaIds: [] };
   }
 
   let firstMediaId = "";
   let updatedHtml = html;
   const allMediaIds: string[] = [];
+  const uploadedBySource = new Map<string, UploadResponse>();
 
   for (const match of matches) {
     const [fullTag, src] = match;
@@ -172,7 +188,11 @@ async function uploadImagesInHtml(
 
     console.error(`[wechat-api] Uploading image: ${imagePath}`);
     try {
-      const resp = await uploadImage(imagePath, accessToken, baseDir);
+      let resp = uploadedBySource.get(imagePath);
+      if (!resp) {
+        resp = await uploadImage(imagePath, accessToken, baseDir);
+        uploadedBySource.set(imagePath, resp);
+      }
       const newTag = fullTag
         .replace(/\ssrc=["'][^"']+["']/, ` src="${resp.url}"`)
         .replace(/\sdata-local-path=["'][^"']+["']/, "");
@@ -183,6 +203,30 @@ async function uploadImagesInHtml(
       }
     } catch (err) {
       console.error(`[wechat-api] Failed to upload ${imagePath}:`, err);
+    }
+  }
+
+  for (const image of contentImages) {
+    if (!updatedHtml.includes(image.placeholder)) continue;
+
+    const imagePath = image.localPath || image.originalPath;
+    console.error(`[wechat-api] Uploading placeholder image: ${imagePath}`);
+
+    try {
+      let resp = uploadedBySource.get(imagePath);
+      if (!resp) {
+        resp = await uploadImage(imagePath, accessToken, baseDir);
+        uploadedBySource.set(imagePath, resp);
+      }
+
+      const replacementTag = `<img src="${resp.url}" style="display: block; width: 100%; margin: 1.5em auto;">`;
+      updatedHtml = replaceAllPlaceholders(updatedHtml, image.placeholder, replacementTag);
+      allMediaIds.push(resp.media_id);
+      if (!firstMediaId) {
+        firstMediaId = resp.media_id;
+      }
+    } catch (err) {
+      console.error(`[wechat-api] Failed to upload placeholder ${image.placeholder}:`, err);
     }
   }
 
@@ -245,7 +289,7 @@ async function publishToDraft(
 }
 
 function parseFrontmatter(content: string): { frontmatter: Record<string, string>; body: string } {
-  const match = content.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n([\s\S]*)$/);
+  const match = content.match(/^\s*---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
   if (!match) return { frontmatter: {}, body: content };
 
   const frontmatter: Record<string, string> = {};
@@ -266,38 +310,42 @@ function parseFrontmatter(content: string): { frontmatter: Record<string, string
   return { frontmatter, body: match[2]! };
 }
 
-function renderMarkdownToHtml(
+function renderMarkdownWithPlaceholders(
   markdownPath: string,
   theme: string = "default",
   color?: string,
-  citeStatus: boolean = true
-): string {
+  citeStatus: boolean = true,
+  title?: string,
+): MarkdownRenderResult {
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = path.dirname(__filename);
-  const renderScript = path.join(__dirname, "md", "render.ts");
+  const mdToWechatScript = path.join(__dirname, "md-to-wechat.ts");
   const baseDir = path.dirname(markdownPath);
 
-  const renderArgs = ["-y", "bun", renderScript, markdownPath, "--theme", theme];
-  if (color) renderArgs.push("--color", color);
-  if (citeStatus) renderArgs.push("--cite");
+  const args = ["-y", "bun", mdToWechatScript, markdownPath];
+  if (title) args.push("--title", title);
+  if (theme) args.push("--theme", theme);
+  if (color) args.push("--color", color);
+  if (!citeStatus) args.push("--no-cite");
 
-  console.error(`[wechat-api] Rendering markdown with theme: ${theme}${color ? `, color: ${color}` : ""}, citeStatus: ${citeStatus}`);
-  const result = spawnSync("npx", renderArgs, {
+  console.error(`[wechat-api] Rendering markdown with placeholders via md-to-wechat: ${theme}${color ? `, color: ${color}` : ""}, citeStatus: ${citeStatus}`);
+  const result = spawnSync("npx", args, {
     stdio: ["inherit", "pipe", "pipe"],
     cwd: baseDir,
   });
 
   if (result.status !== 0) {
     const stderr = result.stderr?.toString() || "";
-    throw new Error(`Render failed: ${stderr}`);
+    throw new Error(`Markdown placeholder render failed: ${stderr}`);
   }
 
-  const htmlPath = markdownPath.replace(/\.md$/i, ".html");
-  if (!fs.existsSync(htmlPath)) {
-    throw new Error(`HTML file not generated: ${htmlPath}`);
-  }
+  const stdout = result.stdout?.toString() || "";
+  return JSON.parse(stdout) as MarkdownRenderResult;
+}
 
-  return htmlPath;
+function replaceAllPlaceholders(html: string, placeholder: string, replacement: string): string {
+  const escapedPlaceholder = placeholder.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return html.replace(new RegExp(escapedPlaceholder, "g"), replacement);
 }
 
 function extractHtmlContent(htmlPath: string): string {
@@ -459,6 +507,7 @@ async function main(): Promise<void> {
   let htmlPath: string;
   let htmlContent: string;
   let frontmatter: Record<string, string> = {};
+  let contentImages: ImageInfo[] = [];
 
   if (args.isHtml) {
     htmlPath = filePath;
@@ -491,8 +540,14 @@ async function main(): Promise<void> {
     if (!digest) digest = frontmatter.digest || frontmatter.summary || frontmatter.description || "";
 
     console.error(`[wechat-api] Theme: ${args.theme}${args.color ? `, color: ${args.color}` : ""}, citeStatus: ${args.citeStatus}`);
-    htmlPath = renderMarkdownToHtml(filePath, args.theme, args.color, args.citeStatus);
+    const rendered = renderMarkdownWithPlaceholders(filePath, args.theme, args.color, args.citeStatus, args.title);
+    htmlPath = rendered.htmlPath;
+    contentImages = rendered.contentImages;
+    if (!title) title = rendered.title;
+    if (!author) author = rendered.author;
+    if (!digest) digest = rendered.summary;
     console.error(`[wechat-api] HTML generated: ${htmlPath}`);
+    console.error(`[wechat-api] Placeholder images: ${contentImages.length}`);
     htmlContent = extractHtmlContent(htmlPath);
   }
 
@@ -527,6 +582,7 @@ async function main(): Promise<void> {
       digest: digest || undefined,
       htmlPath,
       contentLength: htmlContent.length,
+      placeholderImageCount: contentImages.length || undefined,
       account: resolved.alias || undefined,
     }, null, 2));
     return;
@@ -540,7 +596,8 @@ async function main(): Promise<void> {
   const { html: processedHtml, firstMediaId, allMediaIds } = await uploadImagesInHtml(
     htmlContent,
     accessToken,
-    baseDir
+    baseDir,
+    contentImages,
   );
   htmlContent = processedHtml;
 
