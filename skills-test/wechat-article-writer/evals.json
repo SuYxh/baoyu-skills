@@ -1,0 +1,26 @@
+{
+  "skill_name": "wechat-article-writer",
+  "evals": [
+    {
+      "id": 1,
+      "name": "tutorial-from-scratch",
+      "prompt": "帮我写一篇公众号文章，主题是：如何用 Python 实现一个简单的命令行待办事项管理工具。文章类型是教程类，从零开始写。",
+      "expected_output": "一篇完整的教程类公众号文章，包含标题建议、摘要、正文、互动引导、SEO关键词。文章应该使用第一人称叙事，场景化开头，包含代码示例。",
+      "files": []
+    },
+    {
+      "id": 2,
+      "name": "news-with-reference",
+      "prompt": "帮我写一篇公众号文章，介绍 Claude 3.7 发布的新特性。参考文档在 /Users/bytedance/Desktop/fc/person-project/baoyu-skills/reference-document/claude-37-release.md（如果文件不存在，请假设这是一个关于 Claude 3.7 新特性的文档，包含：扩展思考模式、代码能力提升、多模态能力增强等内容）。文章类型是行业资讯。",
+      "expected_output": "一篇行业资讯类公众号文章，整合参考资料内容但不是直接复制。包含标题建议、摘要、正文、互动引导、SEO关键词。",
+      "files": []
+    },
+    {
+      "id": 3,
+      "name": "commentary-hot-topic",
+      "prompt": "帮我写一篇公众号文章，评论最近 AI 编程助手 Cursor 被爆出会偷偷上传用户代码到云端的事件。文章类型是热点评论，要有观点、有分析。",
+      "expected_output": "一篇热点评论类公众号文章，包含事件描述、分析、个人观点、结论。使用第一人称叙事，有情绪表达但不过激。包含标题建议、摘要、正文、互动引导、SEO关键词。",
+      "files": []
+    }
+  ]
+}

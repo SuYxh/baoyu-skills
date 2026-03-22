@@ -1,0 +1,43 @@
+{
+  "eval_id": 1,
+  "eval_name": "tutorial-from-scratch",
+  "prompt": "帮我写一篇公众号文章，主题是：如何用 Python 实现一个简单的命令行待办事项管理工具。文章类型是教程类，从零开始写。",
+  "assertions": [
+    {
+      "name": "has_title_suggestions",
+      "description": "文章应包含3个或以上的标题建议",
+      "type": "contains",
+      "expected": "标题建议"
+    },
+    {
+      "name": "has_summary",
+      "description": "文章应包含摘要部分",
+      "type": "contains",
+      "expected": "摘要"
+    },
+    {
+      "name": "has_interaction_guide",
+      "description": "文章应包含互动引导部分",
+      "type": "contains",
+      "expected": "互动引导"
+    },
+    {
+      "name": "has_seo_keywords",
+      "description": "文章应包含SEO关键词部分",
+      "type": "contains",
+      "expected": "SEO 关键词"
+    },
+    {
+      "name": "uses_first_person",
+      "description": "文章应使用第一人称叙事",
+      "type": "contains",
+      "expected": "我"
+    },
+    {
+      "name": "has_scenario_opening",
+      "description": "文章开头应该是场景化的",
+      "type": "regex",
+      "expected": "(昨天|上周|下午|今天|刚才|最近)"
+    }
+  ]
+}
