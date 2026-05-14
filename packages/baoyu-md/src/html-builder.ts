@@ -4,7 +4,27 @@ import { fileURLToPath } from "node:url";
 import type { StyleConfig, HtmlDocumentMeta } from "./types.js";
 import { DEFAULT_STYLE } from "./constants.js";
 
-const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
+function resolveCommonJsDir(): string | undefined {
+  try {
+    const value = eval(
+      "typeof module === 'object' && module && module.exports && typeof __dirname === 'string' ? __dirname : undefined",
+    );
+    return typeof value === "string" ? value : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function resolveModuleDir(metaUrl?: string): string {
+  const commonJsDir = resolveCommonJsDir();
+  if (commonJsDir) return commonJsDir;
+  if (!metaUrl) {
+    throw new Error("Unable to resolve module directory.");
+  }
+  return path.dirname(fileURLToPath(metaUrl));
+}
+
+const SCRIPT_DIR = resolveModuleDir(import.meta.url);
 const CODE_THEMES_DIR = path.resolve(SCRIPT_DIR, "code-themes");
 
 export function buildCss(baseCss: string, themeCss: string, style: StyleConfig = DEFAULT_STYLE): string {
@@ -45,19 +65,24 @@ export function loadCodeThemeCss(themeName: string): string {
 }
 
 export function buildHtmlDocument(meta: HtmlDocumentMeta, css: string, html: string, codeThemeCss?: string): string {
+  const escapeHtmlAttribute = (value: string) => value
+    .replace(/&/g, "&amp;")
+    .replace(/"/g, "&quot;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
   const lines = [
     "<!doctype html>",
     "<html>",
     "<head>",
     '  <meta charset="utf-8" />',
     '  <meta name="viewport" content="width=device-width, initial-scale=1" />',
-    `  <title>${meta.title}</title>`,
+    `  <title>${escapeHtmlAttribute(meta.title)}</title>`,
   ];
   if (meta.author) {
-    lines.push(`  <meta name="author" content="${meta.author}" />`);
+    lines.push(`  <meta name="author" content="${escapeHtmlAttribute(meta.author)}" />`);
   }
   if (meta.description) {
-    lines.push(`  <meta name="description" content="${meta.description}" />`);
+    lines.push(`  <meta name="description" content="${escapeHtmlAttribute(meta.description)}" />`);
   }
   lines.push(`  <style>${css}</style>`);
   if (codeThemeCss) {

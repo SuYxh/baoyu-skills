@@ -5,7 +5,7 @@ import { existsSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
-import { listReleaseFiles, validateSelfContainedRelease } from "./lib/release-files.mjs";
+import { listReleaseFiles, mimeType, validateSelfContainedRelease } from "./lib/release-files.mjs";
 
 const DEFAULT_REGISTRY = "https://clawhub.ai";
 
@@ -279,26 +279,6 @@ function titleCase(value) {
     .replace(/[-_]+/g, " ")
     .replace(/\s+/g, " ")
     .replace(/\b\w/g, (char) => char.toUpperCase());
-}
-
-const MIME_MAP = {
-  ".md": "text/markdown",
-  ".ts": "text/plain",
-  ".js": "text/javascript",
-  ".mjs": "text/javascript",
-  ".json": "application/json",
-  ".yml": "text/yaml",
-  ".yaml": "text/yaml",
-  ".txt": "text/plain",
-  ".html": "text/html",
-  ".css": "text/css",
-  ".xml": "text/xml",
-  ".svg": "image/svg+xml",
-};
-
-function mimeType(relPath) {
-  const ext = path.extname(relPath).toLowerCase();
-  return MIME_MAP[ext] || "text/plain";
 }
 
 function parseBoolean(value) {

@@ -10,6 +10,20 @@ const PACKAGE_DEPENDENCY_SECTIONS = [
 
 const SKIPPED_DIRS = new Set([".git", ".clawhub", ".clawdhub", "node_modules", "out", "dist", "build"]);
 const SKIPPED_FILES = new Set([".DS_Store", "bun.lockb"]);
+const MIME_MAP = {
+  ".md": "text/markdown",
+  ".ts": "text/plain",
+  ".js": "text/javascript",
+  ".mjs": "text/javascript",
+  ".json": "application/json",
+  ".yml": "text/yaml",
+  ".yaml": "text/yaml",
+  ".txt": "text/plain",
+  ".html": "text/html",
+  ".css": "text/css",
+  ".xml": "text/xml",
+  ".svg": "image/svg+xml",
+};
 
 export async function listReleaseFiles(root) {
   const resolvedRoot = path.resolve(root);
@@ -40,9 +54,10 @@ export async function listReleaseFiles(root) {
 }
 
 export async function validateSelfContainedRelease(root) {
+  const resolvedRoot = path.resolve(root);
   const files = await listReleaseFiles(root);
   for (const file of files.filter((entry) => path.posix.basename(entry.relPath) === "package.json")) {
-    const packageDir = path.resolve(root, fromPosixRel(path.posix.dirname(file.relPath)));
+    const packageDir = path.resolve(resolvedRoot, fromPosixRel(path.posix.dirname(file.relPath)));
     const packageJson = JSON.parse(file.bytes.toString("utf8"));
     for (const section of PACKAGE_DEPENDENCY_SECTIONS) {
       const dependencies = packageJson[section];
@@ -51,7 +66,7 @@ export async function validateSelfContainedRelease(root) {
       for (const [name, spec] of Object.entries(dependencies)) {
         if (typeof spec !== "string" || !spec.startsWith("file:")) continue;
         const targetDir = path.resolve(packageDir, spec.slice(5));
-        if (!isWithinRoot(root, targetDir)) {
+        if (!isWithinRoot(resolvedRoot, targetDir)) {
           throw new Error(
             `Release target is not self-contained: ${file.relPath} depends on ${name} via ${spec}`,
           );
@@ -61,7 +76,33 @@ export async function validateSelfContainedRelease(root) {
         });
       }
     }
+
+    for (const target of getPackageBinTargets(packageJson)) {
+      const targetPath = path.resolve(packageDir, target);
+      if (!isWithinRoot(resolvedRoot, targetPath)) {
+        throw new Error(`Release target is not self-contained: ${file.relPath} bin points to ${target}`);
+      }
+      await fs.access(targetPath).catch(() => {
+        throw new Error(`Missing package bin target for release: ${file.relPath} -> ${target}`);
+      });
+    }
   }
+}
+
+export function mimeType(relPath) {
+  const ext = path.extname(relPath).toLowerCase();
+  return MIME_MAP[ext] || "text/plain";
+}
+
+function getPackageBinTargets(packageJson) {
+  const bin = packageJson.bin;
+  if (typeof bin === "string" && bin.trim()) {
+    return [bin.trim()];
+  }
+  if (!bin || typeof bin !== "object" || Array.isArray(bin)) {
+    return [];
+  }
+  return Object.values(bin).filter((value) => typeof value === "string" && value.trim());
 }
 
 function fromPosixRel(relPath) {

@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  cleanSummaryText,
   extractSummaryFromBody,
   extractTitleFromMarkdown,
   parseFrontmatter,
@@ -90,4 +91,20 @@ This is **the first paragraph** with [a link](https://example.com) and \`inline 
     summary,
     "This is the first paragraph with a link and inline code that should...",
   );
+});
+
+test("summary extraction normalizes raw HTML paragraphs to plain text", () => {
+  const summary = extractSummaryFromBody(
+    `
+# Heading
+<p style="font-size: 16px; color: #666; margin-bottom: 20px;">2026年初，一只“龙虾”搅动了整个科技圈。腾讯楼下排起近千人长队，只为让工程师领取一份福利。</p>
+`,
+    120,
+  );
+
+  assert.equal(
+    summary,
+    "2026年初，一只“龙虾”搅动了整个科技圈。腾讯楼下排起近千人长队，只为让工程师领取一份福利。",
+  );
+  assert.equal(cleanSummaryText("<strong>Good&nbsp;text&#33;&apos;</strong>"), "Good text!'");
 });

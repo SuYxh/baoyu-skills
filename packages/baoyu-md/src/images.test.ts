@@ -17,14 +17,14 @@ async function makeTempDir(prefix: string): Promise<string> {
 
 test("replaceMarkdownImagesWithPlaceholders rewrites markdown and tracks image metadata", () => {
   const result = replaceMarkdownImagesWithPlaceholders(
-    `![cover](images/cover.png)\n\nText\n\n![diagram](images/diagram.webp)`,
+    `![cover](imgs/cover.png)\n\nText\n\n![diagram](imgs/diagram.webp)`,
     "IMG_",
   );
 
   assert.equal(result.markdown, `IMG_1\n\nText\n\nIMG_2`);
   assert.deepEqual(result.images, [
-    { alt: "cover", originalPath: "images/cover.png", placeholder: "IMG_1" },
-    { alt: "diagram", originalPath: "images/diagram.webp", placeholder: "IMG_2" },
+    { alt: "cover", originalPath: "imgs/cover.png", placeholder: "IMG_1" },
+    { alt: "diagram", originalPath: "imgs/diagram.webp", placeholder: "IMG_2" },
   ]);
 });
 

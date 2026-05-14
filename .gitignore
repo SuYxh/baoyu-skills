@@ -83,6 +83,10 @@ out
 .nuxt
 dist
 
+# Shared package builds are published to npm.
+!packages/*/dist/
+!packages/*/dist/**
+
 # Gatsby files
 .cache/
 # Comment in the public line in if your project uses Gatsby and not Next.js
@@ -154,6 +158,7 @@ illustrations/
 comic/
 translate/
 posts/
+diagram/
 ### IntelliJ IDEA ###
 .idea
 *.iws
@@ -167,3 +172,7 @@ posts/
 .release-artifacts/
 .worktrees/
 youtube-transcript/
+.omx/
+.codex-tmp/
+outputs/
+wechat/

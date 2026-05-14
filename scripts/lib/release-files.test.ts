@@ -65,6 +65,40 @@ test("validateSelfContainedRelease accepts file dependencies that stay within th
   await assert.doesNotReject(() => validateSelfContainedRelease(root));
 });
 
+test("validateSelfContainedRelease accepts package bin targets inside the release root", async (t) => {
+  const root = await makeTempDir("baoyu-release-bin-ok-");
+  t.after(() => fs.rm(root, { recursive: true, force: true }));
+
+  await writeJson(path.join(root, "scripts", "package.json"), {
+    name: "test-skill-scripts",
+    version: "1.0.0",
+    bin: {
+      "test-skill": "./test-skill",
+    },
+  });
+  await writeFile(path.join(root, "scripts", "test-skill"), "#!/usr/bin/env sh\n");
+
+  await assert.doesNotReject(() => validateSelfContainedRelease(root));
+});
+
+test("validateSelfContainedRelease rejects missing package bin targets", async (t) => {
+  const root = await makeTempDir("baoyu-release-bin-missing-");
+  t.after(() => fs.rm(root, { recursive: true, force: true }));
+
+  await writeJson(path.join(root, "scripts", "package.json"), {
+    name: "test-skill-scripts",
+    version: "1.0.0",
+    bin: {
+      "test-skill": "./missing",
+    },
+  });
+
+  await assert.rejects(
+    () => validateSelfContainedRelease(root),
+    /Missing package bin target for release/,
+  );
+});
+
 test("validateSelfContainedRelease rejects missing local file dependencies", async (t) => {
   const root = await makeTempDir("baoyu-release-missing-");
   t.after(() => fs.rm(root, { recursive: true, force: true }));

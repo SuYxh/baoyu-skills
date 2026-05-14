@@ -2,6 +2,392 @@
 
 [English](./CHANGELOG.md) | 中文
 
+## 1.116.0 - 2026-05-13
+
+### 新功能
+- 新增 `baoyu-wechat-summary` 技能：将微信群聊精华提炼为结构化简报，支持话题提取、发言排行榜和群友画像。可生成正常版和毒舌版，支持增量模式和画像回溯初始化。需安装 [wx-cli](https://github.com/jackwener/wx-cli)。
+
+## 1.115.4 - 2026-05-11
+
+### 文档
+- 图片生成后端选择规则强化：明确将 Codex `imagegen` 作为运行时原生工具的优先项（通过 `Skill` 工具调用，`skill: "imagegen"`），并禁止在无可用光栅后端时降级为 SVG/HTML/canvas 等代码渲染 —— 应退回到询问用户，而非静默输出代码绘图。规则同步更新到 `docs/image-generation-tools.md`，并按自包含规则内联到 `baoyu-article-illustrator`、`baoyu-comic`、`baoyu-cover-image`、`baoyu-image-cards`、`baoyu-infographic`、`baoyu-slide-deck`、`baoyu-xhs-images`。
+
+## 1.115.3 - 2026-05-11
+
+### 修复
+- `baoyu-post-to-wechat`：修复微信编辑器中复制粘贴前未激活标签页的问题 (by @fengxiaodong28)
+- `baoyu-post-to-x`：X 文章图片插入改用工具栏媒体上传替代剪贴板粘贴方式
+
+## 1.115.2 - 2026-05-10
+
+### 修复
+- `baoyu-post-to-x`：将显式请求 Codex Chrome 插件的场景作为独立浏览器控制模式处理，避免 Chrome Computer Use 或 CDP 回退流程静默接管；同时改进 X Articles 草稿创建按钮检测。
+
+## 1.115.1 - 2026-05-10
+
+### 修复
+- `baoyu-imagine`：将默认 MiniMax 图片 API 端点改为 `https://api.minimaxi.com`，与当前官方图片生成文档保持一致；仍可通过 `MINIMAX_BASE_URL` 覆盖为 `https://api.minimax.io`。
+- `baoyu-image-gen`：同步已废弃图片生成入口的 MiniMax 默认端点和回归测试。
+
+## 1.115.0 - 2026-05-09
+
+### 新功能
+- `baoyu-post-to-x`：新增 Chrome Computer Use 作为 Codex 环境下的首选执行模式。当 Computer Use 工具可用时，所有 X 界面操作（发帖、文章、引用、视频）均通过用户真实 Chrome 窗口完成，不再使用 CDP 脚本。CDP 脚本降级为 Computer Use 不可用或用户明确要求时的回退方案。
+
+## 1.114.1 - 2026-05-08
+
+### 修复
+- `baoyu-danger-gemini-web`：修复当前 Gemini Web 响应中生成图 URL 以 `https://lh3.googleusercontent.com/gg-dl/` 形式出现、但不再包含旧版生成图 marker 时的图片提取失败问题。补充该响应形态的回归测试。 (by @evilstar2016)
+
+## 1.114.0 - 2026-05-05
+
+### 新功能
+- `baoyu-infographic`：新增 `retro-popup-pop` 风格 —— 复古像素弹窗 × 波普信息图。画面由多个 80/90 年代桌面弹窗叠加而成（标题栏、关闭按钮、ERROR / ALERT 报错对话框、`PROBLEMS.EXE` 等复古文件窗、进度条、OK / CANCEL / FIX IT 按钮），统一粗黑描边、平涂色块，背景使用亮青蓝（#12B8DE）或复古奶油色（#F5F0E6）。与 `dense-modules` 布局尤其契合；同时升级为 `高密度信息大图` 关键词快捷方式与 `Product/Buying Guide` 内容类型的推荐风格。风格库从 21 个扩展至 22 个。
+  Credit to AJ@WaytoAGI.
+
+### 文档
+- `release-skills`：补充 GitHub Release 发布流程，包括从 changelog 段落提取 release notes、创建 annotated tag、执行 `gh release create/edit`，以及为已有 tag 回填历史 GitHub Releases。
+
+## 1.113.0 - 2026-04-25
+
+### 新功能
+- `baoyu-imagine`：新增 DashScope Wan 2.7 图像模型支持（`wan2.7-image-pro` 与 `wan2.7-image`），通过阿里云百炼官方 API 直接调用，无需经 Replicate 转发。支持文生图、图像编辑、多图融合（最多 9 张参考图），按官方文档校验 `[1:8, 8:1]` 宽高比范围，并按模式应用不同的像素预算规则。强制 `parameters.n: 1` 以匹配 baoyu-imagine 的单图保存语义，显式拒绝 `--n > 1`，避免在用户不知情的情况下产生多图计费（API 在非拼图模式下默认 `n=4`）。允许通过 `--provider dashscope --ref ...` 显式启用 Wan 2.7 参考图工作流。
+
+## 1.112.0 - 2026-04-24
+
+### 新功能
+- `baoyu-article-illustrator`：当内容分析未检测到明确信号时，将 `hand-drawn-edu`（infographic + sketch-notes + macaron）作为通用默认预设 —— 暖奶油色纸面背景、黑色手绘线条、柔和马卡龙色块。`sketch-notes` 升级为 infographic / flowchart / comparison / framework 自动选择的首选风格；重写 sketch-notes 风格规范（马卡龙调色板、标准单页布局、仅限示意图的规则）；新增对应的 prompt 模板块和默认工作流规则。
+- `baoyu-article-illustrator`：新增 `hand-drawn-edu-flow`（flowchart）和 `hand-drawn-edu-compare`（comparison）两个预设，保持相同的温暖教育风格。
+
+### 破坏性变更
+- `baoyu-article-illustrator`：`hand-drawn-edu` 预设的类型由 `flowchart` 改为 `infographic`。依赖原有流程图行为的用户请改用新增的 `hand-drawn-edu-flow` 预设。
+
+### 修复
+- `baoyu-post-to-x`：为 `scripts/md-to-html.ts` 添加入口守卫，确保 `x-article.ts` 导入 `parseMarkdown` 时不再触发 CLI 入口逻辑。与 `baoyu-post-to-weibo` 此前的修复保持一致。
+
+## 1.111.1 - 2026-04-21
+
+### 文档
+- 为每个图片生成类技能（`baoyu-infographic`、`baoyu-cover-image`、`baoyu-slide-deck`、`baoyu-image-cards`、`baoyu-xhs-images`、`baoyu-article-illustrator`）新增顶级 `## Confirmation Policy` 章节作为单一事实源：显式调用技能、关键词快捷方式、EXTEND.md 偏好、自动推荐都只是"推荐输入"，不授权跳过确认步骤。跳过确认必须由当前请求中的明确信号触发（`--no-confirm` / `--quick` / `--yes` / "直接生成" / 同义表达）。
+- `baoyu-infographic`：将原先散落在 Step 5、Step 6、Default combination、Keyword Shortcuts 及 preferences 文档中的重复提醒合并为单一策略章节，由 Step 4 的 hard gate 引用。
+
+## 1.111.0 - 2026-04-21
+
+### 重构
+- 统一所有图片生成类技能（`baoyu-infographic`、`baoyu-comic`、`baoyu-cover-image`、`baoyu-image-cards`、`baoyu-article-illustrator`、`baoyu-slide-deck`、`baoyu-xhs-images`）的后端选择规则：新增单一 `preferred_image_backend` 偏好字段（`auto | ask | <backend-id>`），用 4 步解析规则（当前请求覆盖 → 已保存偏好 → 自动选择 → 询问用户）替换原有的无状态询问规则。默认优先使用运行时原生工具（如 Codex `imagegen`、Hermes `image_generate`）；未设置该字段的现有 `EXTEND.md` 文件视为 `auto`，无需升级 schema 版本。
+- 在每个图片技能中新增顶级 `## Changing Preferences` 章节，作为固定后端和修改常用偏好的一级入口。
+
+## 1.110.0 - 2026-04-21
+
+### 新功能
+- `baoyu-imagine`：新增 `gpt-image-2` 支持，用于 OpenAI 图像生成与编辑；将其设为默认 OpenAI 模型，并补齐官方尺寸/质量映射、自定义尺寸约束与 Azure 部署说明
+
+## 1.109.0 - 2026-04-21
+
+### 新功能
+- `baoyu-url-to-markdown`：将 `baoyu-fetch` 运行时代码 vendored 到 `scripts/lib`，并通过本地 `scripts/baoyu-fetch` CLI 调用，使发布后的技能安装不再依赖 `baoyu-fetch` npm 包
+
+### 修复
+- `baoyu-fetch`：修复 X/Twitter 单条内容与 X Article 的视频解析，提取可播放的最高码率 MP4，并将文章视频渲染为 `[video](...)`
+- `sync-clawhub`：改用共享 release 文件清单发布，确保无扩展名 CLI 入口、`bun.lock` 和 vendored `scripts/lib` 文件都会被上传
+
+### 维护
+- 将 `defuddle` 升级到 0.17.0、`jsdom` 升级到 29.0.2，并通过 override 将 `@xmldom/xmldom` 固定到 0.8.13，清除 Defuddle 依赖链上的漏洞提示
+
+## 1.108.0 - 2026-04-19
+
+### 重构
+- 将技能文档拆分为聚焦的参考文件，提升可维护性
+- 将多技能共享代码迁移至 npm 包管理
+
+## 1.107.0 - 2026-04-15
+
+### 新功能
+- `baoyu-diagram`：新增 SVG 转 @2x PNG 转换脚本 —— 使用 Sharp 自动将生成的 SVG 图表转为 @2x PNG；精简合并参考文件，新增 `{baseDir}` 路径解析以支持可移植的技能加载
+
+### 修复
+- `claude-plugin`：支持内联 marketplace manifest (#130)
+
+## 1.106.0 - 2026-04-14
+
+### 新功能
+- `baoyu-diagram`：新增架构图丰富化规则 —— 自动扩展架构图，补充多客户端类型、各服务技术栈、数据库分层、消息总线和分色分类；新增完整结构布局模式、架构专用陷阱提示、网络拓扑模板和复杂图表布局计算
+
+## 1.105.0 - 2026-04-13
+
+### 新功能
+- `baoyu-diagram`：统一为分析→确认→生成工作流 —— 移除单图/多图模式区分；技能现在分析任意输入素材，推荐图表类型和拆分策略，一次确认后批量生成所有图表
+
+## 1.104.0 - 2026-04-13
+
+### 新功能
+- `baoyu-diagram`：新增 Mermaid 草图步骤（6d-0），在生成 SVG 前先写 Mermaid 代码块作为结构意图；在步骤 6f 新增 Mermaid–SVG 一致性检查
+
+### 修复
+- `baoyu-post-to-wechat`：在粘贴和输入操作前校验编辑器焦点，避免粘贴静默失败
+
+## 1.103.1 - 2026-04-13
+
+### 修复
+- `baoyu-markdown-to-html`：修复文章摘要中 HTML 实体未解码及 HTML 标签未剥离的问题
+- `baoyu-post-to-weibo`：修复文章摘要中 HTML 实体未解码及 HTML 标签未剥离的问题
+
+## 1.103.0 - 2026-04-12
+
+### 新功能
+- `baoyu-diagram`：新增多图模式 —— 分析文章内容，在识别出的位置批量生成图表；新增 `--density` 参数（`minimal`、`balanced`、`per-section`、`rich`）和 `--mode` 参数（`single`、`multi`、`auto`）；根据输入自动判断模式（文件路径→多图，短主题→单图）；自动在文章中插入图表链接；输出目录结构 `diagram/{article-slug}/NN-{type}-{slug}/`
+
+### 修复
+- `baoyu-article-illustrator`：修复生成图像中出现颜色名称和色值文字的问题 —— 在所有调色板参考文件和提示构建规则中添加语义约束
+- `baoyu-cover-image`：修复生成图像中出现颜色名称和色值文字的问题 —— 在所有调色板参考文件和提示模板中添加约束
+- `baoyu-image-cards`：修复生成图像中出现颜色名称文字的问题
+- `baoyu-post-to-wechat`：修复文章摘要中 HTML 实体未解码及 HTML 标签未剥离的问题，避免微信文章摘要显示乱码
+
+## 1.102.0 - 2026-04-12
+
+### 新功能
+- `baoyu-imagine`：新增 OpenAI 兼容图像 API 方言支持 —— 新增 `--imageApiDialect` 参数、`OPENAI_IMAGE_API_DIALECT` 环境变量及 `default_image_api_dialect` 配置项，用于对接期望宽高比格式 `size` 加 `metadata.resolution` 的兼容网关
+
+## 1.101.0 - 2026-04-12
+
+### 新功能
+- `baoyu-imagine`：改进 Replicate 服务商兼容性 —— 针对不同模型系列（nano-banana、Seedream 4.5、Seedream 5 Lite、Wan 2.7 Image）实现专属输入构建器和验证器；将默认模型更新为 `google/nano-banana-2`；修复 Seedream 4.5 自定义尺寸编码（改用 width/height schema）；修复不支持的 Replicate 模型的宽高比默认值继承问题；在请求到达 API 前拦截多图请求 (by @justnode)
+
+## 1.100.0 - 2026-04-12
+
+### 新功能
+- `baoyu-imagine`：新增 Z.AI GLM-Image 服务商支持，支持 `glm-image` 和 `cogview-4-250304` 模型，通过 Z.AI 同步图像 API 调用；配置 `ZAI_API_KEY`（或 `BIGMODEL_API_KEY` 向后兼容）
+
+## 1.99.1 - 2026-04-11
+
+### 修复
+- `baoyu-article-illustrator`：未指定 `--model` 时，批处理任务中不再写入 `model` 字段，改由 `baoyu-imagine` 从环境变量或配置中解析默认值
+
+## 1.99.0 - 2026-04-10
+
+### 新功能
+- `baoyu-diagram`：新增技能，用于生成可直接发布的 SVG 图表 —— 包括流程图、架构/结构图、示意图（直觉图解）。Claude 直接输出符合统一设计规范的真实 SVG 代码，产物是单个自包含的 `.svg` 文件，内嵌样式并自动支持深色模式，可直接嵌入文章、微信公众号、幻灯片和文档中
+
+## 1.98.0 - 2026-04-10
+
+### 新功能
+- `baoyu-xhs-images`：恢复为正式技能（移除废弃警告）
+- `baoyu-xhs-images`：新增 `sketch-notes` 风格 —— 手绘教育信息图，马卡龙配色，波动线条，暖奶油背景
+- `baoyu-xhs-images`：新增配色系统（`macaron`、`warm`、`neon`），支持 `--palette` 参数覆盖风格默认颜色
+- `baoyu-xhs-images`：新增 3 个预设：`hand-drawn-edu`、`sketch-card`、`sketch-summary`
+
+## 1.97.1 - 2026-04-09
+
+### 修复
+- `baoyu-image-cards`：将配色方案中 "Zone N" 角色名改为 "Block Color"，防止 AI 将标签文字渲染到图片中
+
+## 1.97.0 - 2026-04-09
+
+### 新功能
+- `baoyu-image-cards`：新增 `sketch-notes` 风格、配色系统（`macaron`、`warm`、`neon`）及 3 个新预设（`hand-drawn-edu`、`sketch-card`、`sketch-summary`）
+
+### 修复
+- `baoyu-xhs-images`：优化已弃用技能描述以改善路由匹配
+
+## 1.96.0 - 2026-04-09
+
+### 新功能
+- `baoyu-image-cards`：新增图片卡片系列技能，从 `baoyu-xhs-images` 迁移，解除小红书平台绑定
+- `baoyu-xhs-images`：已弃用，迁移至 `baoyu-image-cards`
+
+## 1.95.1 - 2026-04-09
+
+### 修复
+- `baoyu-slide-deck`：添加 `pptxgenjs` 依赖，PDF 合并时通过魔数字节检测图片格式替代文件扩展名判断
+
+## 1.95.0 - 2026-04-08
+
+### 新功能
+- `baoyu-infographic`：新增 `hand-drawn-edu` 风格 — 马卡龙柔和色块、手绘线条、火柴人角色
+- `baoyu-slide-deck`：新增 `hand-drawn-edu` 预设和 `macaron` 色调维度，含柔和马卡龙色板
+
+## 1.94.0 - 2026-04-08
+
+### 新功能
+- `baoyu-cover-image`：新增马卡龙色板和 hand-drawn-edu 风格预设
+
+## 1.93.0 - 2026-04-08
+
+### 新功能
+- `baoyu-article-illustrator`：新增 `hand-drawn-edu` 预设 — flowchart + sketch-notes + macaron 组合，用于手绘教育图解
+
+### 重构
+- `baoyu-article-illustrator`：将色板（Palette）提取为独立的第三维度，形成 Type × Style × Palette 三维系统
+
+### 修复
+- `baoyu-article-illustrator`：在工作流中添加显式的风格文件加载步骤
+
+## 1.92.0 - 2026-04-08
+
+### 新功能
+- `baoyu-article-illustrator`：新增 `macaron` 风格 — 马卡龙柔和色块（浅蓝、浅绿、浅紫、浅橙）配暖白底色，可选手绘模式；新增 `edu-visual` 预设
+
+## 1.90.1 - 2026-04-05
+
+### 修复
+- `baoyu-post-to-wechat`：通过 magic bytes 检测实际图片格式，修复 CDN 返回与 URL 扩展名不一致的 content-type 问题（如 .png URL 实际返回 WebP）；WebP 格式按 PNG 策略处理以保留透明度
+
+## 1.89.1 - 2026-04-01
+
+### 新功能
+- `baoyu-chrome-cdp`：新增 `gracefulKillChrome`，等待 Chrome 进程退出并释放端口；修复 `killChrome` 使用 `exitCode`/`signalCode` 替代 `.killed` 以更可靠地检测进程状态
+- `baoyu-fetch`：在交互等待模式下自动检测登录状态，未登录时提示用户先登录再提取内容
+
+### 维护
+- 同步 vendor baoyu-chrome-cdp 至所有 CDP 技能
+- `baoyu-url-to-markdown`：同步 vendor baoyu-fetch 的登录自动检测功能
+
+## 1.89.0 - 2026-03-31
+
+### 新功能
+- `baoyu-fetch`：新增 X 会话 Cookie 旁路文件，跨运行持久化登录状态；通过 Browser.close 优雅关闭 Chrome；自动检测并清理过期的 Chrome 配置锁文件
+- `baoyu-article-illustrator`：新增暖色调矢量插画配色方案，含 `warm-knowledge` 预设
+- `baoyu-post-to-x`：新增登录后 X 会话持久化、Chrome 锁文件恢复和优雅关闭
+
+### 文档
+- `baoyu-post-to-weibo`：新增发帖类型自动选择规则，优化 CDP Chrome 终止指令
+
+### 重构
+- `baoyu-danger-gemini-web`：使用优雅 Chrome 关闭替代强制终止
+- `baoyu-danger-x-to-markdown`：使用优雅 Chrome 关闭替代强制终止
+
+### 修复
+- 同步 npm lockfile 及修复根目录 Node 测试
+
+### 维护
+- `baoyu-url-to-markdown`：同步 vendor baoyu-fetch 的会话和生命周期改进
+- 更新 bun.lock 文件
+
+## 1.88.0 - 2026-03-27
+
+### 新功能
+- `baoyu-fetch`：新增 URL 阅读器 CLI 包，支持 Chrome CDP 和站点适配器（X/Twitter、YouTube、Hacker News、通用页面）
+
+### 重构
+- `baoyu-url-to-markdown`：用 `baoyu-fetch` CLI 替换自定义 CDP/转换管道
+- `shared-skill-packages`：支持 `package.json` 的 `files` 白名单，vendor 同步时过滤测试文件、CHANGELOG 和 `.changeset` 目录
+
+### 修复
+- `baoyu-md`：修正测试中图片路径 `images/` 为 `imgs/`
+
+## 1.87.2 - 2026-03-26
+
+### 重构
+- `baoyu-translate`：精简翻译提示词，将 15+ 条冗长原则压缩为 7 条，合并分析和审校步骤
+
+## 1.87.1 - 2026-03-26
+
+### 维护
+- 在 `baoyu-image-gen` SKILL.md 中添加废弃提示，引导用户使用 `baoyu-imagine`
+- 在 CLAUDE.md 中记录废弃技能策略
+
+## 1.87.0 - 2026-03-26
+
+### 维护
+- 移除已废弃的 `baoyu-image-gen` 重定向技能及插件清单条目 — 向 `baoyu-imagine` 的迁移已完成
+
+## 1.86.0 - 2026-03-25
+
+### 新功能
+- `baoyu-translate`：丰富翻译提示词的分析上下文 — 加入原文语气评估、结构化比喻映射表、理解难点推理、结构性/创造性翻译挑战，以及分块翻译的位置上下文
+
+## 1.85.0 - 2026-03-25
+
+### 新功能
+- `baoyu-imagine`：运行时自动迁移旧版 `baoyu-image-gen` 的 EXTEND.md 配置路径
+- 新增 `baoyu-image-gen` 废弃重定向技能，引导用户安装 `baoyu-imagine` 并移除旧技能
+
+## 1.84.0 - 2026-03-25
+
+### 新功能
+- 将 `baoyu-image-gen` 技能重命名为 `baoyu-imagine` — 更简短的命令名，所有文档、配置和依赖技能中的引用已同步更新
+
+## 1.83.0 - 2026-03-25
+
+### 新功能
+- `baoyu-image-gen`：新增 MiniMax 服务商（`image-01` / `image-01-live`），支持 subject_reference 角色/肖像一致性、自定义尺寸和宽高比
+
+## 1.82.0 - 2026-03-24
+
+### 新功能
+- `baoyu-url-to-markdown`：新增浏览器回退策略 — 默认无头模式优先，技术故障时自动重试有头 Chrome；新增 `--browser auto|headless|headed` 参数及 `--headless`/`--headed` 快捷方式
+- `baoyu-url-to-markdown`：新增内容清理模块，提取前预处理 HTML（移除广告、base64 图片、脚本、样式）
+- `baoyu-url-to-markdown`：媒体本地化支持 base64 data URI 图片
+- `baoyu-url-to-markdown`：从浏览器捕获最终 URL 以跟踪重定向，用于输出路径生成
+- `baoyu-url-to-markdown`：新增 Agent 质量门控文档，规范捕获后的内容验证流程
+
+### 依赖
+- `baoyu-url-to-markdown`：升级 defuddle ^0.12.0 → ^0.14.0
+
+### 测试
+- `baoyu-url-to-markdown`：新增 content-cleaner、html-to-markdown、legacy-converter、media-localizer 单元测试
+
+## 1.81.0 - 2026-03-24
+
+### 新功能
+- `baoyu-youtube-transcript`：YouTube 封锁直连 InnerTube API 时自动回退到 yt-dlp，支持备用客户端身份重试及通过 `YOUTUBE_TRANSCRIPT_COOKIES_FROM_BROWSER` 环境变量传递浏览器 Cookie
+
+### 重构
+- `baoyu-youtube-transcript`：将单体脚本拆分为类型化模块（youtube、transcript、storage、shared、types）并添加单元测试
+
+## 1.80.1 - 2026-03-24
+
+### 修复
+- `baoyu-image-gen`：修正即梦 API 请求中的 `prompt` 字段名
+
+## 1.80.0 - 2026-03-24
+
+### 新功能
+- `baoyu-image-gen`：新增 Azure OpenAI 作为独立图像生成服务商，支持灵活的端点解析、部署名称推断、质量映射及参考图片格式校验
+
+## 1.79.2 - 2026-03-23
+
+### 修复
+- `baoyu-cover-image`：简化参考图片处理流程 — 模型支持 `--ref` 时直接传递，仅在模型不支持参考图时创建描述文件
+- `baoyu-post-to-weibo`：文章 Markdown 转 HTML 时不传递 --theme 参数
+
+### 测试
+- 修复 Node 兼容的解析器测试，添加解析器测试依赖
+
+## 1.79.1 - 2026-03-23
+
+### 修复
+- 合并为单一插件，防止 skill 重复注册 (by @TyrealQ)
+- `baoyu-article-illustrator`：移除水印提示词中的不透明度参数
+- `baoyu-comic`：修正哆啦 A 梦命名间距，移除水印不透明度参数
+- `baoyu-xhs-images`：移除水印不透明度参数，修正中英文间距
+
+### 文档
+- 更新项目文档以反映单一插件架构
+
+## 1.79.0 - 2026-03-22
+
+### 新功能
+- `baoyu-post-to-wechat`：改进凭据加载机制，支持多来源优先级解析，并提供不完整凭据来源的诊断信息
+
+## 1.78.0 - 2026-03-22
+
+### 新功能
+- `baoyu-url-to-markdown`：新增 URL 专用解析层，支持 X/Twitter 和 archive.ph 站点的定制化 HTML 提取
+- `baoyu-url-to-markdown`：改进 slug 生成算法，去除停用词并采用子目录输出结构
+
+### 修复
+- `baoyu-url-to-markdown`：旧版转换器保留包含媒体元素的锚标签
+- `baoyu-url-to-markdown`：更智能的标题去重，避免重复添加标题
+
+## 1.77.0 - 2026-03-22
+
+### 新功能
+- `baoyu-youtube-transcript`：为章节数据添加结束时间 (by @jzOcb)
+
+### 修复
+- `sync-clawhub`：跳过失败的技能而不是中止同步
+
 ## 1.76.1 - 2026-03-21
 
 ### 文档
@@ -298,7 +684,7 @@
 ## 1.52.0 - 2026-03-06
 
 ### 新功能
-- `baoyu-post-to-weibo`：新增 `--video` 视频上传支持（图片+视频最多 18 个文件）
+- `baoyu-post-to-weibo`：新增 `--video` 视频上传支持（图片 + 视频最多 18 个文件）
 - `baoyu-post-to-weibo`：上传方式从剪贴板粘贴改为 `DOM.setFileInputFiles`，提升上传可靠性
 
 ### 修复
@@ -761,7 +1147,7 @@
 ## 1.20.0 - 2026-01-24
 
 ### 新功能
-- `baoyu-cover-image`：从类型 × 风格二维系统升级为**四维系统**——新增 `--text` 维度（none 无文字、title-only 仅标题、title-subtitle 标题+副标题、text-rich 丰富文字）控制文字密度，新增 `--mood` 维度（subtle 低调、balanced 平衡、bold 醒目）控制情感强度。新增 `--quick` 标志跳过确认，直接使用自动选择。
+- `baoyu-cover-image`：从类型 × 风格二维系统升级为**四维系统**——新增 `--text` 维度（none 无文字、title-only 仅标题、title-subtitle 标题 + 副标题、text-rich 丰富文字）控制文字密度，新增 `--mood` 维度（subtle 低调、balanced 平衡、bold 醒目）控制情感强度。新增 `--quick` 标志跳过确认，直接使用自动选择。
 
 ### 文档
 - `baoyu-cover-image`：新增维度参考文件——`references/dimensions/text.md`（文字密度级别）和 `references/dimensions/mood.md`（氛围强度级别）。
@@ -781,7 +1167,7 @@
 - `baoyu-image-gen`：代码模块化——类型定义提取至 `types.ts`，provider 实现提取至 `providers/google.ts` 和 `providers/openai.ts`。
 
 ### 文档
-- `baoyu-comic`：改进 ohmsha 预设文档，明确默认哆啦A梦角色定义和视觉描述。
+- `baoyu-comic`：改进 ohmsha 预设文档，明确默认哆啦 A 梦角色定义和视觉描述。
 
 ## 1.18.3 - 2026-01-23
 

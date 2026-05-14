@@ -7,6 +7,7 @@ import {
   type WechatUploadAsset,
   prepareWechatBodyImageUpload,
   needsWechatBodyImageProcessing,
+  detectImageFormatFromBuffer,
 } from "./wechat-image-processor.ts";
 
 interface AccessTokenResponse {
@@ -136,6 +137,16 @@ async function loadUploadAsset(
       ".ico": "image/x-icon",
     };
     contentType = mimeTypes[fileExt] || "image/jpeg";
+  }
+
+  // Detect actual format from magic bytes to fix extension/content-type mismatches
+  // (e.g. CDNs serving WebP for URLs with .png extension)
+  const detected = detectImageFormatFromBuffer(fileBuffer);
+  if (detected && detected.contentType !== contentType) {
+    console.error(`[wechat-api] Format mismatch: ${filename} declared as ${contentType}, actual ${detected.contentType}`);
+    contentType = detected.contentType;
+    fileExt = detected.fileExt;
+    filename = `${path.basename(filename, path.extname(filename))}${detected.fileExt}`;
   }
 
   return {
@@ -694,6 +705,10 @@ async function main(): Promise<void> {
   }
 
   const creds = loadCredentials(resolved);
+  for (const skippedSource of creds.skippedSources) {
+    console.error(`[wechat-api] Skipped incomplete credential source: ${skippedSource}`);
+  }
+  console.error(`[wechat-api] Credentials source: ${creds.source}`);
   console.error("[wechat-api] Fetching access token...");
   const accessToken = await fetchAccessToken(creds.appId, creds.appSecret);
 

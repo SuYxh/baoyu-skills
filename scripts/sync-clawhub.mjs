@@ -6,47 +6,9 @@ import { existsSync } from "node:fs";
 import path from "node:path";
 import os from "node:os";
 
+import { listReleaseFiles, mimeType, validateSelfContainedRelease } from "./lib/release-files.mjs";
+
 const DEFAULT_REGISTRY = "https://clawhub.ai";
-const TEXT_EXTENSIONS = new Set([
-  "md",
-  "mdx",
-  "txt",
-  "json",
-  "json5",
-  "yaml",
-  "yml",
-  "toml",
-  "js",
-  "cjs",
-  "mjs",
-  "ts",
-  "tsx",
-  "jsx",
-  "py",
-  "sh",
-  "rb",
-  "go",
-  "rs",
-  "swift",
-  "kt",
-  "java",
-  "cs",
-  "cpp",
-  "c",
-  "h",
-  "hpp",
-  "sql",
-  "csv",
-  "ini",
-  "cfg",
-  "env",
-  "xml",
-  "html",
-  "css",
-  "scss",
-  "sass",
-  "svg",
-]);
 
 async function main() {
   const options = parseArgs(process.argv.slice(2));
@@ -75,7 +37,7 @@ async function main() {
   console.log(`Roots with skills: ${roots.join(", ")}`);
 
   const locals = await mapWithConcurrency(skills, options.concurrency, async (skill) => {
-    const files = await listTextFiles(skill.folder);
+    const files = await collectReleaseFiles(skill.folder);
     const fingerprint = buildFingerprint(files);
     return {
       ...skill,
@@ -162,7 +124,7 @@ async function main() {
 
     console.log(`Publishing ${candidate.slug}@${version}`);
     try {
-      const files = await listTextFiles(candidate.folder);
+      const files = await collectReleaseFiles(candidate.folder);
       await publishSkill({
         registry,
         token: config.token,
@@ -363,35 +325,9 @@ async function hasSkillMarker(folder) {
   );
 }
 
-async function listTextFiles(root) {
-  const files = [];
-
-  async function walk(folder) {
-    const entries = await fs.readdir(folder, { withFileTypes: true });
-    for (const entry of entries) {
-      if (entry.name.startsWith(".")) continue;
-      if (entry.name === "node_modules") continue;
-      if (entry.name === ".clawhub" || entry.name === ".clawdhub") continue;
-
-      const fullPath = path.join(folder, entry.name);
-      if (entry.isDirectory()) {
-        await walk(fullPath);
-        continue;
-      }
-      if (!entry.isFile()) continue;
-
-      const relPath = path.relative(root, fullPath).split(path.sep).join("/");
-      const ext = relPath.split(".").pop()?.toLowerCase() ?? "";
-      if (!TEXT_EXTENSIONS.has(ext)) continue;
-
-      const bytes = await fs.readFile(fullPath);
-      files.push({ relPath, bytes });
-    }
-  }
-
-  await walk(root);
-  files.sort((left, right) => left.relPath.localeCompare(right.relPath));
-  return files;
+async function collectReleaseFiles(root) {
+  await validateSelfContainedRelease(root);
+  return listReleaseFiles(root);
 }
 
 function buildFingerprint(files) {
@@ -421,7 +357,7 @@ async function publishSkill({ registry, token, skill, files, version, changelog,
   );
 
   for (const file of files) {
-    form.append("files", new Blob([file.bytes], { type: "text/plain" }), file.relPath);
+    form.append("files", new Blob([file.bytes], { type: mimeType(file.relPath) }), file.relPath);
   }
 
   const response = await fetch(`${registry}/api/v1/skills`, {

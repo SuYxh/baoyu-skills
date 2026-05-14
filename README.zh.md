@@ -32,7 +32,7 @@ npx skills add jimliu/baoyu-skills
 ClawHub 按“单个 skill”安装，不是把整个 marketplace 一次性装进去。发布后，用户可以按需安装：
 
 ```bash
-clawhub install baoyu-image-gen
+clawhub install baoyu-imagine
 clawhub install baoyu-markdown-to-html
 ```
 
@@ -52,16 +52,14 @@ clawhub install baoyu-markdown-to-html
 
 1. 选择 **Browse and install plugins**
 2. 选择 **baoyu-skills**
-3. 选择要安装的插件
+3. 选择 **baoyu-skills** 插件
 4. 选择 **Install now**
 
 **方式二：直接安装**
 
 ```bash
-# 安装指定插件
-/plugin install content-skills@baoyu-skills
-/plugin install ai-generation-skills@baoyu-skills
-/plugin install utility-skills@baoyu-skills
+# 安装 marketplace 中唯一的插件
+/plugin install baoyu-skills@baoyu-skills
 ```
 
 **方式三：告诉 Agent**
@@ -72,11 +70,11 @@ clawhub install baoyu-markdown-to-html
 
 ### 可用插件
 
-| 插件 | 说明 | 包含技能 |
+现在 marketplace 只暴露一个插件，这样每个 skill 只会注册一次。
+
+| 插件 | 说明 | 包含内容 |
 |------|------|----------|
-| **content-skills** | 内容生成和发布 | [xhs-images](#baoyu-xhs-images), [infographic](#baoyu-infographic), [cover-image](#baoyu-cover-image), [slide-deck](#baoyu-slide-deck), [comic](#baoyu-comic), [article-illustrator](#baoyu-article-illustrator), [post-to-x](#baoyu-post-to-x), [post-to-wechat](#baoyu-post-to-wechat), [post-to-weibo](#baoyu-post-to-weibo) |
-| **ai-generation-skills** | AI 生成后端 | [image-gen](#baoyu-image-gen), [danger-gemini-web](#baoyu-danger-gemini-web) |
-| **utility-skills** | 内容处理工具 | [youtube-transcript](#baoyu-youtube-transcript), [url-to-markdown](#baoyu-url-to-markdown), [danger-x-to-markdown](#baoyu-danger-x-to-markdown), [compress-image](#baoyu-compress-image), [format-markdown](#baoyu-format-markdown), [markdown-to-html](#baoyu-markdown-to-html), [translate](#baoyu-translate) |
+| **baoyu-skills** | 提供内容生成、AI 后端和日常效率工具技能 | 仓库中的全部 skills，仍按下方的内容技能、AI 生成技能、工具技能三个分类展示 |
 
 ## 更新技能
 
@@ -101,7 +99,7 @@ clawhub install baoyu-markdown-to-html
 
 #### baoyu-xhs-images
 
-小红书信息图系列生成器。将内容拆解为 1-10 张卡通风格信息图，支持 **风格 × 布局** 二维系统。
+小红书图片卡片系列生成器。将内容拆解为 1-10 张卡通风格图片卡片，支持 **风格 × 布局** 系统和可选配色覆盖。
 
 ```bash
 # 自动选择风格和布局
@@ -114,13 +112,22 @@ clawhub install baoyu-markdown-to-html
 /baoyu-xhs-images posts/ai-future/article.md --layout dense
 
 # 组合风格和布局
-/baoyu-xhs-images posts/ai-future/article.md --style tech --layout list
+/baoyu-xhs-images posts/ai-future/article.md --style notion --layout list
+
+# 覆盖配色
+/baoyu-xhs-images posts/ai-future/article.md --style notion --palette macaron
 
 # 直接输入内容
 /baoyu-xhs-images 今日星座运势
+
+# 非交互模式（跳过所有确认，适用于定时任务）
+/baoyu-xhs-images posts/ai-future/article.md --yes
+/baoyu-xhs-images posts/ai-future/article.md --yes --preset knowledge-card
 ```
 
-**风格**（视觉美学）：`cute`（默认）、`fresh`、`warm`、`bold`、`minimal`、`retro`、`pop`、`notion`、`chalkboard`
+**风格**（视觉美学）：`cute`（默认）、`fresh`、`warm`、`bold`、`minimal`、`retro`、`pop`、`notion`、`chalkboard`、`study-notes`、`screen-print`、`sketch-notes`
+
+**配色**（可选颜色覆盖）：`macaron`、`warm`、`neon`
 
 **风格预览**：
 
@@ -154,7 +161,7 @@ clawhub install baoyu-markdown-to-html
 
 #### baoyu-infographic
 
-专业信息图生成器，支持 20 种布局和 17 种视觉风格。分析内容后推荐布局×风格组合，生成可发布的信息图。
+专业信息图生成器，支持 21 种布局和 21 种视觉风格。分析内容后推荐布局×风格组合，生成可发布的信息图。
 
 ```bash
 # 根据内容自动推荐组合
@@ -265,9 +272,46 @@ clawhub install baoyu-markdown-to-html
 | ![knolling](./screenshots/infographic-styles/knolling.webp) | ![lego-brick](./screenshots/infographic-styles/lego-brick.webp) | |
 | knolling | lego-brick | |
 
+#### baoyu-diagram
+
+从源素材生成可直接发布的 SVG 图表 —— 包括流程图、时序/协议图、架构/结构图、示意图（直觉图解）。分析输入素材，推荐图表类型和拆分策略，一次确认后批量生成。Claude 直接输出符合统一设计规范的真实 SVG 代码，产物是自包含的 `.svg` 文件，内嵌样式并自动支持深色模式。
+
+```bash
+# 主题描述 —— 技能分析并提出方案
+/baoyu-diagram "JWT 认证流程是怎么工作的"
+/baoyu-diagram "Kubernetes 架构" --type structural
+/baoyu-diagram "OAuth 2.0 流程"  --type sequence
+
+# 文件路径 —— 技能读取、分析并提出方案
+/baoyu-diagram path/to/article.md
+
+# 语言和输出路径
+/baoyu-diagram "微服务架构" --lang zh
+/baoyu-diagram "build pipeline" --out docs/build-pipeline.svg
+```
+
+**参数**：
+| 参数 | 说明 |
+|------|------|
+| `--type <name>` | `flowchart`、`sequence`、`structural`、`illustrative`、`class`、`auto`（默认）。跳过类型推荐直接生成。 |
+| `--lang <code>` | 输出语言（en、zh、ja 等） |
+| `--out <path>` | 输出文件路径。生成聚焦于最重要内容的单张图表。 |
+
+**五种图表类型**：
+
+| 类型 | 适用场景 | 触发动词 |
+|------|----------|----------|
+| `flowchart` | 按顺序走一遍流程 | 流程、步骤、工作流、生命周期、状态机 |
+| `sequence` | 谁和谁通信、按什么顺序 | 协议、握手、认证流程、OAuth、TCP、请求/响应 |
+| `structural` | 展示什么包含什么、如何组织 | 架构、组件、拓扑、布局、什么在什么里面 |
+| `illustrative` | 建立直觉 —— 画出机制本身 | 怎么工作、原理、为什么、直观解释 |
+| `class` | 类型是什么、它们如何关联 | 类图、UML、继承、接口、数据模型 |
+
+本技能不调用任何图像生成模型 —— Claude 通过手算坐标直接写 SVG 代码，确保每个图表都遵守设计规范。内嵌的 `<style>` 块包含 `@media (prefers-color-scheme: dark)`，同一个文件在浅色和深色模式下均正确渲染，可嵌入到任意支持 SVG 的宿主环境中。
+
 #### baoyu-cover-image
 
-为文章生成封面图，支持五维定制系统：类型 × 配色 × 渲染 × 文字 × 氛围。9 种配色方案与 6 种渲染风格组合，提供 54 种独特效果。
+为文章生成封面图，支持五维定制系统：类型 × 配色 × 渲染 × 文字 × 氛围。11 种配色方案与 7 种渲染风格组合，提供 77 种独特效果。
 
 ```bash
 # 根据内容自动选择所有维度
@@ -292,8 +336,8 @@ clawhub install baoyu-markdown-to-html
 
 **五个维度**：
 - **类型 (Type)**：`hero`、`conceptual`、`typography`、`metaphor`、`scene`、`minimal`
-- **配色 (Palette)**：`warm`、`elegant`、`cool`、`dark`、`earth`、`vivid`、`pastel`、`mono`、`retro`
-- **渲染 (Rendering)**：`flat-vector`、`hand-drawn`、`painterly`、`digital`、`pixel`、`chalk`
+- **配色 (Palette)**：`warm`、`elegant`、`cool`、`dark`、`earth`、`vivid`、`pastel`、`mono`、`retro`、`duotone`、`macaron`
+- **渲染 (Rendering)**：`flat-vector`、`hand-drawn`、`painterly`、`digital`、`pixel`、`chalk`、`screen-print`
 - **文字 (Text)**：`none`、`title-only`（默认）、`title-subtitle`、`text-rich`
 - **氛围 (Mood)**：`subtle`、`balanced`（默认）、`bold`
 
@@ -471,20 +515,17 @@ clawhub install baoyu-markdown-to-html
 
 #### baoyu-article-illustrator
 
-智能文章插图技能，采用类型 × 风格二维系统。分析文章结构，识别需要视觉辅助的位置，生成插图。
+智能文章插图技能，采用类型 × 风格 × 色板三维系统。分析文章结构，识别需要视觉辅助的位置，生成插图。
 
 ```bash
 # 根据内容自动选择类型和风格
 /baoyu-article-illustrator path/to/article.md
 
-# 指定类型
-/baoyu-article-illustrator path/to/article.md --type infographic
-
-# 指定风格
-/baoyu-article-illustrator path/to/article.md --style blueprint
-
 # 组合类型和风格
 /baoyu-article-illustrator path/to/article.md --type flowchart --style notion
+
+# 使用色板覆盖
+/baoyu-article-illustrator path/to/article.md --style vector-illustration --palette macaron
 ```
 
 **类型**（信息结构）：
@@ -498,7 +539,7 @@ clawhub install baoyu-markdown-to-html
 | `framework` | 概念图、关系图 | 方法论、架构 |
 | `timeline` | 时间线进展 | 历史、项目进度 |
 
-**风格**（视觉美学）：
+**风格**（渲染手法）：
 
 | 风格 | 描述 | 适用场景 |
 |------|------|----------|
@@ -510,6 +551,14 @@ clawhub install baoyu-markdown-to-html
 | `watercolor` | 柔和艺术感、自然温暖 | 生活方式、旅行、创意 |
 | `editorial` | 杂志风格信息图 | 科技解说、新闻 |
 | `scientific` | 学术精确图表 | 生物、化学、技术 |
+
+**色板**（可选配色覆盖）：
+
+| 色板 | 描述 | 适用场景 |
+|------|------|----------|
+| `macaron` | 马卡龙柔和色块（浅蓝、浅绿、浅紫、浅橙）暖白底 | 教育、知识分享、教程 |
+| `warm` | 暖色系（橙、赭石、金）无冷色 | 品牌、产品、生活方式 |
+| `neon` | 霓虹色（粉、青、黄）深色底 | 游戏、复古、潮流 |
 
 **风格预览**：
 
@@ -663,40 +712,67 @@ accounts:
 
 AI 驱动的生成后端。
 
-#### baoyu-image-gen
+#### baoyu-imagine
 
-基于 AI SDK 的图像生成，支持 OpenAI、Google、OpenRouter、DashScope（阿里通义万相）、即梦（Jimeng）、豆包（Seedream）和 Replicate API。支持文生图、参考图、宽高比和质量预设。
+基于 AI SDK 的图像生成，支持 OpenAI GPT Image 2、Azure OpenAI、Google、OpenRouter、DashScope（阿里通义万相）、MiniMax、即梦（Jimeng）、豆包（Seedream）和 Replicate API。支持文生图、参考图、宽高比、自定义尺寸、批量生成和质量预设。
 
 ```bash
 # 基础生成（自动检测服务商）
-/baoyu-image-gen --prompt "一只可爱的猫" --image cat.png
+/baoyu-imagine --prompt "一只可爱的猫" --image cat.png
 
 # 指定宽高比
-/baoyu-image-gen --prompt "风景图" --image landscape.png --ar 16:9
+/baoyu-imagine --prompt "风景图" --image landscape.png --ar 16:9
 
 # 高质量（2k 分辨率）
-/baoyu-image-gen --prompt "横幅图" --image banner.png --quality 2k
+/baoyu-imagine --prompt "横幅图" --image banner.png --quality 2k
 
 # 指定服务商
-/baoyu-image-gen --prompt "一只猫" --image cat.png --provider openai
+/baoyu-imagine --prompt "一只猫" --image cat.png --provider openai --model gpt-image-2
+
+# Azure OpenAI（model 为部署名称）
+/baoyu-imagine --prompt "一只猫" --image cat.png --provider azure --model gpt-image-2
 
 # OpenRouter
-/baoyu-image-gen --prompt "一只猫" --image cat.png --provider openrouter
+/baoyu-imagine --prompt "一只猫" --image cat.png --provider openrouter
+
+# OpenRouter + 参考图
+/baoyu-imagine --prompt "把它变成蓝色" --image out.png --provider openrouter --model google/gemini-3.1-flash-image-preview --ref source.png
 
 # DashScope（阿里通义万相）
-/baoyu-image-gen --prompt "一只可爱的猫" --image cat.png --provider dashscope
+/baoyu-imagine --prompt "一只可爱的猫" --image cat.png --provider dashscope
 
-# Replicate
-/baoyu-image-gen --prompt "一只猫" --image cat.png --provider replicate
+# DashScope 自定义尺寸
+/baoyu-imagine --prompt "为咖啡品牌设计一张 21:9 横幅海报，包含清晰中文标题" --image banner.png --provider dashscope --model qwen-image-2.0-pro --size 2048x872
+
+# Z.AI GLM-Image
+/baoyu-imagine --prompt "一张带清晰中文标题的科技海报" --image out.png --provider zai
+
+# MiniMax
+/baoyu-imagine --prompt "A fashion editorial portrait by a bright studio window" --image out.jpg --provider minimax
+
+# MiniMax + 角色参考图
+/baoyu-imagine --prompt "A girl stands by the library window, cinematic lighting" --image out.jpg --provider minimax --model image-01 --ref portrait.png --ar 16:9
+
+# Replicate（默认：google/nano-banana-2）
+/baoyu-imagine --prompt "一只猫" --image cat.png --provider replicate
+
+# Replicate Seedream 4.5
+/baoyu-imagine --prompt "一张影棚人像" --image portrait.png --provider replicate --model bytedance/seedream-4.5 --ar 3:2
+
+# Replicate Wan 2.7 Image Pro
+/baoyu-imagine --prompt "一张概念分镜" --image frame.png --provider replicate --model wan-video/wan-2.7-image-pro --size 2048x1152
 
 # 即梦（Jimeng）
-/baoyu-image-gen --prompt "一只可爱的猫" --image cat.png --provider jimeng
+/baoyu-imagine --prompt "一只可爱的猫" --image cat.png --provider jimeng
 
 # 豆包（Seedream）
-/baoyu-image-gen --prompt "一只可爱的猫" --image cat.png --provider seedream
+/baoyu-imagine --prompt "一只可爱的猫" --image cat.png --provider seedream
 
-# 带参考图（Google、OpenAI、OpenRouter、Replicate 或 Seedream 5.0/4.5/4.0）
-/baoyu-image-gen --prompt "把它变成蓝色" --image out.png --ref source.png
+# 带参考图（Google、OpenAI、Azure OpenAI、OpenRouter、Replicate、MiniMax 或 Seedream 5.0/4.5/4.0）
+/baoyu-imagine --prompt "把它变成蓝色" --image out.png --ref source.png
+
+# 批量模式
+/baoyu-imagine --batchfile batch.json --jobs 4 --json
 ```
 
 **选项**：
@@ -705,44 +781,85 @@ AI 驱动的生成后端。
 | `--prompt`, `-p` | 提示词文本 |
 | `--promptfiles` | 从文件读取提示词（多文件拼接） |
 | `--image` | 输出图片路径（必需） |
-| `--provider` | `google`、`openai`、`openrouter`、`dashscope`、`jimeng`、`seedream` 或 `replicate`（默认：自动检测，优先 google） |
-| `--model`, `-m` | 模型 ID |
+| `--batchfile` | 多图批量生成的 JSON 文件 |
+| `--jobs` | 批量模式的并发 worker 数 |
+| `--provider` | `google`、`openai`、`azure`、`openrouter`、`dashscope`、`zai`、`minimax`、`jimeng`、`seedream` 或 `replicate` |
+| `--model`, `-m` | 模型 ID 或部署名。Azure 使用部署名；OpenRouter 使用完整模型 ID；Z.AI 使用 `glm-image`；MiniMax 使用 `image-01` / `image-01-live` |
 | `--ar` | 宽高比（如 `16:9`、`1:1`、`4:3`） |
-| `--size` | 尺寸（如 `1024x1024`） |
+| `--size` | 尺寸（如 `1024x1024`；`gpt-image-2` 支持最长边不超过 3840px 的有效自定义尺寸） |
 | `--quality` | `normal` 或 `2k`（默认：`2k`） |
-| `--ref` | 参考图片（Google、OpenAI、OpenRouter、Replicate 或 Seedream 5.0/4.5/4.0） |
+| `--imageSize` | Google/OpenRouter 使用的 `1K`、`2K`、`4K` |
+| `--imageApiDialect` | OpenAI 兼容网关的图像 API 方言（`openai-native` 或 `ratio-metadata`） |
+| `--ref` | 参考图片（Google、OpenAI、Azure OpenAI、OpenRouter、Replicate 支持的模型家族、MiniMax 或 Seedream 5.0/4.5/4.0） |
+| `--n` | 单次请求生成图片数量（`replicate` 当前只支持 `--n 1`） |
+| `--json` | 输出 JSON 结果 |
 
 **环境变量**（配置方法见[环境配置](#环境配置)）：
 | 变量 | 说明 | 默认值 |
 |------|------|--------|
 | `OPENAI_API_KEY` | OpenAI API 密钥 | - |
+| `AZURE_OPENAI_API_KEY` | Azure OpenAI API 密钥 | - |
 | `OPENROUTER_API_KEY` | OpenRouter API 密钥 | - |
 | `GOOGLE_API_KEY` | Google API 密钥 | - |
+| `GEMINI_API_KEY` | `GOOGLE_API_KEY` 的别名 | - |
 | `DASHSCOPE_API_KEY` | DashScope API 密钥（阿里云） | - |
+| `ZAI_API_KEY` | Z.AI API 密钥 | - |
+| `BIGMODEL_API_KEY` | Z.AI API 密钥向后兼容别名 | - |
+| `MINIMAX_API_KEY` | MiniMax API 密钥 | - |
 | `REPLICATE_API_TOKEN` | Replicate API Token | - |
 | `JIMENG_ACCESS_KEY_ID` | 即梦火山引擎 Access Key | - |
 | `JIMENG_SECRET_ACCESS_KEY` | 即梦火山引擎 Secret Key | - |
 | `ARK_API_KEY` | 豆包火山引擎 ARK API 密钥 | - |
-| `OPENAI_IMAGE_MODEL` | OpenAI 模型 | `gpt-image-1.5` |
+| `OPENAI_IMAGE_MODEL` | OpenAI 模型 | `gpt-image-2` |
+| `AZURE_OPENAI_DEPLOYMENT` | Azure 默认部署名 | - |
+| `AZURE_OPENAI_IMAGE_MODEL` | 兼容旧配置的 Azure 部署/模型别名 | `gpt-image-2` |
 | `OPENROUTER_IMAGE_MODEL` | OpenRouter 模型 | `google/gemini-3.1-flash-image-preview` |
 | `GOOGLE_IMAGE_MODEL` | Google 模型 | `gemini-3-pro-image-preview` |
 | `DASHSCOPE_IMAGE_MODEL` | DashScope 模型 | `qwen-image-2.0-pro` |
-| `REPLICATE_IMAGE_MODEL` | Replicate 模型 | `google/nano-banana-pro` |
+| `ZAI_IMAGE_MODEL` | Z.AI 模型 | `glm-image` |
+| `BIGMODEL_IMAGE_MODEL` | Z.AI 模型向后兼容别名 | `glm-image` |
+| `MINIMAX_IMAGE_MODEL` | MiniMax 模型 | `image-01` |
+| `REPLICATE_IMAGE_MODEL` | Replicate 模型 | `google/nano-banana-2` |
 | `JIMENG_IMAGE_MODEL` | 即梦模型 | `jimeng_t2i_v40` |
 | `SEEDREAM_IMAGE_MODEL` | 豆包模型 | `doubao-seedream-5-0-260128` |
 | `OPENAI_BASE_URL` | 自定义 OpenAI 端点 | - |
+| `OPENAI_IMAGE_API_DIALECT` | OpenAI 兼容图像 API 方言（`openai-native` 或 `ratio-metadata`） | `openai-native` |
+| `OPENAI_IMAGE_USE_CHAT` | OpenAI 改走 `/chat/completions` | `false` |
+| `AZURE_OPENAI_BASE_URL` | Azure 资源或部署端点 | - |
+| `AZURE_API_VERSION` | Azure 图像 API 版本 | `2025-04-01-preview` |
 | `OPENROUTER_BASE_URL` | 自定义 OpenRouter 端点 | `https://openrouter.ai/api/v1` |
+| `OPENROUTER_HTTP_REFERER` | OpenRouter 归因用站点 URL | - |
+| `OPENROUTER_TITLE` | OpenRouter 归因用应用名 | - |
 | `GOOGLE_BASE_URL` | 自定义 Google 端点 | - |
 | `DASHSCOPE_BASE_URL` | 自定义 DashScope 端点 | - |
+| `ZAI_BASE_URL` | 自定义 Z.AI 端点 | `https://api.z.ai/api/paas/v4` |
+| `BIGMODEL_BASE_URL` | Z.AI 端点向后兼容别名 | - |
+| `MINIMAX_BASE_URL` | 自定义 MiniMax 端点 | `https://api.minimaxi.com` |
 | `REPLICATE_BASE_URL` | 自定义 Replicate 端点 | - |
 | `JIMENG_BASE_URL` | 自定义即梦端点 | `https://visual.volcengineapi.com` |
 | `JIMENG_REGION` | 即梦区域 | `cn-north-1` |
 | `SEEDREAM_BASE_URL` | 自定义豆包端点 | `https://ark.cn-beijing.volces.com/api/v3` |
+| `BAOYU_IMAGE_GEN_MAX_WORKERS` | 批量模式最大 worker 数 | `10` |
+| `BAOYU_IMAGE_GEN_<PROVIDER>_CONCURRENCY` | 覆盖 provider 并发数 | provider 默认值 |
+| `BAOYU_IMAGE_GEN_<PROVIDER>_START_INTERVAL_MS` | 覆盖 provider 请求启动间隔 | provider 默认值 |
+
+**Provider 说明**：
+- Azure OpenAI：`--model` 表示 Azure deployment name，不是底层模型家族名。
+- DashScope：`qwen-image-2.0-pro` 是自定义 `--size`、`21:9` 和中英文排版的推荐默认模型。
+- Z.AI：`glm-image` 适合海报、图表和中英文排版密集的图片生成，暂不支持参考图。
+- MiniMax：`image-01` 支持官方文档里的自定义 `width` / `height`；`image-01-live` 更偏低延迟，适合配合 `--ar` 使用。
+- MiniMax 参考图会走 `subject_reference`，当前能力更偏角色 / 人像一致性。
+- 即梦不支持参考图。
+- 豆包参考图能力仅适用于 Seedream 5.0 / 4.5 / 4.0，不适用于 Seedream 3.0。
+- Replicate 默认模型改为 `google/nano-banana-2`。`baoyu-imagine` 目前只对 `google/nano-banana*`、`bytedance/seedream-4.5`、`bytedance/seedream-5-lite`、`wan-video/wan-2.7-image` 和 `wan-video/wan-2.7-image-pro` 开启本地能力识别与校验。
+- Replicate 当前只保存单张输出图，`--n > 1` 会在本地直接报错，避免多图结果被静默丢弃。
+- Replicate 的参数能力按模型家族区分：nano-banana 走 `--quality` / `--ar`，Seedream 走校验后的 `--size` / `--ar`，Wan 走校验后的 `--size`（`--ar` 会先在本地换算成具体尺寸）。
 
 **服务商自动选择**：
 1. 如果指定了 `--provider` → 使用指定的
-2. 如果只有一个 API 密钥 → 使用对应服务商
-3. 如果多个可用 → 默认使用 Google
+2. 如果传了 `--ref` 且未指定 provider → 依次尝试 Google、OpenAI、Azure、OpenRouter、Replicate、Seedream，最后是 MiniMax
+3. 如果只有一个 API 密钥 → 使用对应服务商
+4. 如果多个可用 → 默认使用 Google，然后依次为 OpenAI、Azure、OpenRouter、DashScope、Z.AI、MiniMax、Replicate、即梦、豆包
 
 #### baoyu-danger-gemini-web
 
@@ -995,12 +1112,42 @@ AI 驱动的生成后端。
 - 为文化/专业术语添加译注
 - 输出目录保留所有中间文件
 
+#### baoyu-wechat-summary
+
+微信群聊精华提取。使用 [wx-cli](https://github.com/jackwener/wx-cli) 从群消息中提取话题、引言和统计数据，生成结构化简报。支持跨次运行的群聊历史和群友画像维护，可生成正常版和毒舌版。
+
+```bash
+# 总结群最近消息
+/baoyu-wechat-summary 消失的大叔 最近 1 天
+
+# 周报
+/baoyu-wechat-summary AI 技术群 最近 7 天
+
+# 增量模式（从上次摘要继续）
+/baoyu-wechat-summary 消失的大叔
+
+# 毒舌版
+/baoyu-wechat-summary 消失的大叔 最近 3 天 毒舌版
+```
+
+**前置要求**：
+- 安装 [wx-cli](https://github.com/jackwener/wx-cli)（`npm install -g @jackwener/wx-cli`）
+- macOS 上运行并登录 WeChat 4.x
+
+**特性**：
+- 话题提取，带归属和引言
+- 发言排行榜和群友画像
+- 增量模式（从上次摘要断点继续）
+- 大批量消息自动按天分割
+- 正常版和毒舌版两种风格
+- 支持从历史摘要回溯初始化画像
+
 ## 环境配置
 
 部分技能需要 API 密钥或自定义配置。环境变量可以在 `.env` 文件中设置：
 
 **加载优先级**（高优先级覆盖低优先级）：
-1. 命令行环境变量（如 `OPENAI_API_KEY=xxx /baoyu-image-gen ...`）
+1. 命令行环境变量（如 `OPENAI_API_KEY=xxx /baoyu-imagine ...`）
 2. `process.env`（系统环境变量）
 3. `<cwd>/.baoyu-skills/.env`（项目级）
 4. `~/.baoyu-skills/.env`（用户级）
@@ -1015,13 +1162,22 @@ mkdir -p ~/.baoyu-skills
 cat > ~/.baoyu-skills/.env << 'EOF'
 # OpenAI
 OPENAI_API_KEY=sk-xxx
-OPENAI_IMAGE_MODEL=gpt-image-1.5
+OPENAI_IMAGE_MODEL=gpt-image-2
 # OPENAI_BASE_URL=https://api.openai.com/v1
+# OPENAI_IMAGE_USE_CHAT=false
+
+# Azure OpenAI
+AZURE_OPENAI_API_KEY=xxx
+AZURE_OPENAI_BASE_URL=https://your-resource.openai.azure.com
+AZURE_OPENAI_DEPLOYMENT=gpt-image-2
+# AZURE_API_VERSION=2025-04-01-preview
 
 # OpenRouter
 OPENROUTER_API_KEY=sk-or-xxx
 OPENROUTER_IMAGE_MODEL=google/gemini-3.1-flash-image-preview
 # OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
+# OPENROUTER_HTTP_REFERER=https://your-app.example.com
+# OPENROUTER_TITLE=你的应用名
 
 # Google
 GOOGLE_API_KEY=xxx
@@ -1033,9 +1189,19 @@ DASHSCOPE_API_KEY=sk-xxx
 DASHSCOPE_IMAGE_MODEL=qwen-image-2.0-pro
 # DASHSCOPE_BASE_URL=https://dashscope.aliyuncs.com/api/v1
 
+# Z.AI
+ZAI_API_KEY=xxx
+ZAI_IMAGE_MODEL=glm-image
+# ZAI_BASE_URL=https://api.z.ai/api/paas/v4
+
+# MiniMax
+MINIMAX_API_KEY=xxx
+MINIMAX_IMAGE_MODEL=image-01
+# MINIMAX_BASE_URL=https://api.minimaxi.com
+
 # Replicate
 REPLICATE_API_TOKEN=r8_xxx
-REPLICATE_IMAGE_MODEL=google/nano-banana-pro
+REPLICATE_IMAGE_MODEL=google/nano-banana-2
 # REPLICATE_BASE_URL=https://api.replicate.com
 
 # 即梦（Jimeng）
@@ -1128,6 +1294,7 @@ HTTP_PROXY=http://127.0.0.1:7890 HTTPS_PROXY=http://127.0.0.1:7890 /baoyu-danger
 - [doocs/md](https://github.com/doocs/md) by [@doocs](https://github.com/doocs) — Markdown 转 HTML 的核心实现逻辑
 - [高密度信息图 Prompt](https://waytoagi.feishu.cn/wiki/YG0zwalijihRREkgmPzcWRInnUg) by AJ@WaytoAGI — 信息图技能的灵感来源
 - [qiaomu-mondo-poster-design](https://github.com/joeseesun/qiaomu-mondo-poster-design) by [@joeseesun](https://github.com/joeseesun)（乔木） — Mondo 风格的灵感来源
+- [architecture-diagram-generator](https://github.com/Cocoon-AI/architecture-diagram-generator) by [@Cocoon-AI](https://github.com/Cocoon-AI) — 图表技能设计体系的灵感来源
 
 ## 许可证
 

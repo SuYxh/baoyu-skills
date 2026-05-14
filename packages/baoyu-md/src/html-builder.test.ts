@@ -39,6 +39,22 @@ test("buildHtmlDocument includes optional meta tags and code theme CSS", () => {
   assert.match(html, /<article>Hello<\/article>/);
 });
 
+test("buildHtmlDocument escapes head metadata attributes", () => {
+  const html = buildHtmlDocument(
+    {
+      title: `Doc <draft>`,
+      author: `Bao"yu`,
+      description: `<p style="color: red">Summary & notes</p>`,
+    },
+    "",
+    "",
+  );
+
+  assert.match(html, /<title>Doc &lt;draft&gt;<\/title>/);
+  assert.match(html, /meta name="author" content="Bao&quot;yu"/);
+  assert.match(html, /meta name="description" content="&lt;p style=&quot;color: red&quot;&gt;Summary &amp; notes&lt;\/p&gt;"/);
+});
+
 test("normalizeCssText and normalizeInlineCss replace variables and strip declarations", () => {
   const rawCss = `
 :root { --md-primary-color: #000; --md-font-size: 12px; --foreground: 0 0% 5%; }

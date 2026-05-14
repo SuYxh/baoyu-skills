@@ -11,6 +11,7 @@ import {
   discoverRunningChromeDebugPort,
   findChromeExecutable,
   findExistingChromeDebugPort,
+  gracefulKillChrome,
   getFreePort,
   openPageSession,
   resolveSharedChromeProfileDir,
@@ -108,6 +109,44 @@ async function stopProcess(child: ChildProcess | null): Promise<void> {
   if (child.exitCode === null && child.signalCode === null) child.kill("SIGKILL");
   if (child.exitCode !== null || child.signalCode !== null) return;
   await new Promise((resolve) => child.once("exit", resolve));
+}
+
+async function startPortHoldingProcess(port: number): Promise<ChildProcess> {
+  const child = spawn(
+    process.execPath,
+    [
+      "-e",
+      `
+        const http = require("node:http");
+        const port = Number(process.argv[1]);
+        const server = http.createServer((_req, res) => res.end("ok"));
+        server.listen(port, "127.0.0.1", () => process.stdout.write("ready\\n"));
+        setInterval(() => {}, 1000);
+      `,
+      String(port),
+    ],
+    {
+      stdio: ["ignore", "pipe", "ignore"],
+    },
+  );
+
+  await new Promise<void>((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error("Timed out waiting for child server to start.")), 3_000);
+    child.once("error", (error) => {
+      clearTimeout(timer);
+      reject(error);
+    });
+    child.stdout?.once("data", () => {
+      clearTimeout(timer);
+      resolve();
+    });
+    child.once("exit", () => {
+      clearTimeout(timer);
+      reject(new Error("Child server exited before becoming ready."));
+    });
+  });
+
+  return child;
 }
 
 test("getFreePort honors a fixed environment override and otherwise allocates a TCP port", async (t) => {
@@ -304,4 +343,20 @@ test("waitForChromeDebugPort retries until the debug endpoint becomes available"
   await serverPromise;
 
   assert.equal(websocketUrl, `ws://127.0.0.1:${port}/devtools/browser/demo`);
+});
+
+test("gracefulKillChrome waits for the Chrome process to exit and release its port", async (t) => {
+  const port = await getFreePort();
+  const child = await startPortHoldingProcess(port);
+  t.after(async () => { await stopProcess(child); });
+
+  assert.equal(await waitForChromeDebugPort(port, 1_000).catch(() => null), null);
+
+  await gracefulKillChrome(child, port, 4_000);
+
+  assert.ok(child.exitCode !== null || child.signalCode !== null);
+  assert.equal(
+    await fetch(`http://127.0.0.1:${port}`).then(() => true).catch(() => false),
+    false,
+  );
 });
