@@ -1,0 +1,187 @@
+skills-zh/baoyu-infographic/SKILL.md
+  ae72ecd60c5fe0dc 3-323 gitai:{"mixed_line_ranges":[],"operations":[{"operation_id":"6a0558486b6fd72a7af483e1","tool_type":"agent","tool_id":"Write","line_ranges":[{"Range":[3,323]}]}]}
+skills-zh/baoyu-image-gen/SKILL.md
+  ae72ecd60c5fe0dc 3-229 gitai:{"mixed_line_ranges":[],"operations":[{"operation_id":"6a0558486b6fd72a7af483e1","tool_type":"agent","tool_id":"Write","line_ranges":[{"Range":[3,229]}]}]}
+skills-zh/baoyu-url-to-markdown/SKILL.md
+  ae72ecd60c5fe0dc 3-171 gitai:{"mixed_line_ranges":[],"operations":[{"operation_id":"6a0558486b6fd72a7af483e1","tool_type":"agent","tool_id":"Write","line_ranges":[{"Range":[3,171]}]}]}
+skills-zh/baoyu-youtube-transcript/SKILL.md
+  ae72ecd60c5fe0dc 3-186 gitai:{"mixed_line_ranges":[],"operations":[{"operation_id":"6a0558486b6fd72a7af483e1","tool_type":"agent","tool_id":"Write","line_ranges":[{"Range":[3,186]}]}]}
+skills-zh/baoyu-imagine/SKILL.md
+  ae72ecd60c5fe0dc 3-237 gitai:{"mixed_line_ranges":[],"operations":[{"operation_id":"6a0558486b6fd72a7af483e1","tool_type":"agent","tool_id":"Write","line_ranges":[{"Range":[3,237]}]}]}
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "733b6de08f1e00bf360132d884dd2d74c8d4e99f",
+  "prompts": {
+    "ae72ecd60c5fe0dc": {
+      "agent_id": {
+        "tool": "trae",
+        "id": "69e7670b59eb8e197d247c36",
+        "model": "c_o_new_thinking__dev"
+      },
+      "human_author": "“杨鑫昊” <yangxinhao.9527@bytedance.com>",
+      "messages": [],
+      "total_additions": 733,
+      "total_deletions": 733,
+      "accepted_lines": 733,
+      "overriden_lines": 0
+    }
+  },
+  "attestation_metadata": {
+    "skills-zh/baoyu-image-gen/SKILL.md": [
+      {
+        "hash": "ae72ecd60c5fe0dc",
+        "line_ranges": [
+          {
+            "Range": [
+              3,
+              229
+            ]
+          }
+        ],
+        "mixed_line_ranges": [],
+        "operations": [
+          {
+            "operation_id": "6a0558486b6fd72a7af483e1",
+            "tool_type": "agent",
+            "tool_id": "Write",
+            "line_ranges": [
+              {
+                "Range": [
+                  3,
+                  229
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "skills-zh/baoyu-imagine/SKILL.md": [
+      {
+        "hash": "ae72ecd60c5fe0dc",
+        "line_ranges": [
+          {
+            "Range": [
+              3,
+              237
+            ]
+          }
+        ],
+        "mixed_line_ranges": [],
+        "operations": [
+          {
+            "operation_id": "6a0558486b6fd72a7af483e1",
+            "tool_type": "agent",
+            "tool_id": "Write",
+            "line_ranges": [
+              {
+                "Range": [
+                  3,
+                  237
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "skills-zh/baoyu-infographic/SKILL.md": [
+      {
+        "hash": "ae72ecd60c5fe0dc",
+        "line_ranges": [
+          {
+            "Range": [
+              3,
+              323
+            ]
+          }
+        ],
+        "mixed_line_ranges": [],
+        "operations": [
+          {
+            "operation_id": "6a0558486b6fd72a7af483e1",
+            "tool_type": "agent",
+            "tool_id": "Write",
+            "line_ranges": [
+              {
+                "Range": [
+                  3,
+                  323
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "skills-zh/baoyu-url-to-markdown/SKILL.md": [
+      {
+        "hash": "ae72ecd60c5fe0dc",
+        "line_ranges": [
+          {
+            "Range": [
+              3,
+              171
+            ]
+          }
+        ],
+        "mixed_line_ranges": [],
+        "operations": [
+          {
+            "operation_id": "6a0558486b6fd72a7af483e1",
+            "tool_type": "agent",
+            "tool_id": "Write",
+            "line_ranges": [
+              {
+                "Range": [
+                  3,
+                  171
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "skills-zh/baoyu-youtube-transcript/SKILL.md": [
+      {
+        "hash": "ae72ecd60c5fe0dc",
+        "line_ranges": [
+          {
+            "Range": [
+              3,
+              186
+            ]
+          }
+        ],
+        "mixed_line_ranges": [],
+        "operations": [
+          {
+            "operation_id": "6a0558486b6fd72a7af483e1",
+            "tool_type": "agent",
+            "tool_id": "Write",
+            "line_ranges": [
+              {
+                "Range": [
+                  3,
+                  186
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "remote_transcripts": {
+    "ae72ecd60c5fe0dc": {
+      "tool": "trae",
+      "conversation_id": "69e7670b59eb8e197d247c36",
+      "session_id": "69e7670b59eb8e197d247c36",
+      "status": "remote_only",
+      "message": "Remote transcript resolution is not implemented yet for TRAE prompts."
+    }
+  }
+}
