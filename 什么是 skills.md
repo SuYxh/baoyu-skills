@@ -317,6 +317,66 @@ helixent config model add help # 查看具体 `add` 方法如何使用
 
 用 skill-creator 生成 Skill
 
+1、提问告诉我们的需求准备生 skills 
+
+![image](https://qn.huat.xyz/mac/202605172343386.png)
+
+
+
+2、回答AI 的问题 - 沟通清楚需求
+
+![img](https://qn.huat.xyz/mac/202605172344742.(null))
+
+
+
+3、第二批问题
+
+![image (1)](https://qn.huat.xyz/mac/202605172345613.png)
+
+
+
+4、开始起草初始版本 skills
+
+![image (2)](https://qn.huat.xyz/mac/202605172345989.png)
+
+
+
+5、跑出来的问题： 有些订阅源消失了
+
+![image (3)](/Users/bytedance/Downloads/image (3).png)
+
+
+
+
+
+6、第一次优化： 多方面优化：
+
+![image (4)](https://qn.huat.xyz/mac/202605172347103.png)
+
+
+
+6、第二次优化：
+
+![image (5)](https://qn.huat.xyz/mac/202605172348216.png)
+
+
+
+7、配置项优化
+
+![image (6)](https://qn.huat.xyz/mac/202605172348265.png)
+
+
+
+
+
+8、并行抓取优化， 默认是 10 个并发，最多 50 
+
+![image (7)](https://qn.huat.xyz/mac/202605172349574.png)
+
+
+
+
+
 ## ls-house-updating-bam  （前端更新bam skills）
 
 > 与 ai-news 的"重量级"形成对比，展示一个只有 SKILL.md 的"轻量级"业务 Skill。
