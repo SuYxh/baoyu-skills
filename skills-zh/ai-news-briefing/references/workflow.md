@@ -90,13 +90,15 @@ AI 相关判断信号：
 
 ```yaml
 title: 中文标题
-summary: 一句话摘要
+summary: 2-3 句中文摘要，覆盖事实和影响
 category: 行业动态 | 产品和工具 | 开源 | 融资商业 | 论文
 importance: high | medium | low
 representative_url: 最可信或信息最完整的链接
 source_name: 代表来源名称
 source_count: 合并来源数量
 published_at: ISO 时间或 null
+image_candidates:
+  - 可选图片 URL
 ```
 
 代表来源选择顺序：
@@ -149,11 +151,21 @@ published_at: ISO 时间或 null
 写作规则：
 
 - 全文中文。
-- 单条资讯默认一句话摘要。
+- 单条资讯默认 2-3 句说明，覆盖“是什么”和“为什么值得关注”。
+- 每条资讯使用 `### [标题](representative_url)`，标题必须可点击。
+- 不要输出不可点击的 `**标题**：摘要` 形式。
 - 标题要自然，不要机械翻译。
 - 保留必要英文专名，例如 `GPT-5`、`Claude Code`、`LangChain`、`Qwen`。
 - 避免夸张营销词，如"革命性"、"颠覆性"，除非来源明确且确有重大影响。
-- 每条末尾只放一个代表链接。
+- 来源信息放在条目末尾，例如 `来源：OpenAI Developers`。
+- 如果 `image_candidates` 中有明显相关的高质量图片，每条最多插入 1 张。
+
+图片选择规则：
+
+- 优先使用来自原文 `og:image` / `twitter:image` 或正文首图的图片。
+- 其次使用 RSS `media:content`、`enclosure` 或 description 中的图片。
+- 跳过头像、logo、icon、emoji、tracking pixel 和无关装饰图。
+- 如果不确定图片是否和新闻相关，宁可不插入。
 
 ## Step 8: Save And Report
 

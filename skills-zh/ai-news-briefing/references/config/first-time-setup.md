@@ -107,6 +107,16 @@ fetch:
   retries: 1
   retry_backoff: 1.5
   max_feed_bytes: 5000000
+output:
+  detail_level: standard
+  title_links: true
+  include_images: true
+  image_mode: remote
+  max_images_per_item: 1
+  include_source_line: true
+  include_stats: true
+  include_failed_sources: true
+  include_raw_json_path: true
 categories:
   - 行业动态
   - 产品和工具

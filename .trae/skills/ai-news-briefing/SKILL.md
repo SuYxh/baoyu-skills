@@ -76,6 +76,13 @@ fetch:
   retries: 1
   retry_backoff: 1.5
   max_feed_bytes: 5000000
+output:
+  detail_level: standard
+  title_links: true
+  include_images: true
+  image_mode: remote
+  max_images_per_item: 1
+  include_source_line: true
 categories:
   - 行业动态
   - 产品和工具
@@ -124,7 +131,7 @@ python3 {baseDir}/scripts/fetch_news.py \
 1. 根据 `items` 字段进行语义去重：同一事件合并为一个新闻项。
 2. 按重要性排序：多源重复、官方来源、模型/产品发布、开源项目、论文/融资优先。
 3. 归入默认 5 类。
-4. 按 [输出模板](references/output-template.md) 写入 Markdown。
+4. 按 [输出模板](references/output-template.md) 写入 Markdown：标题必须可点击，默认每条 2-3 句说明，可插入相关图片。
 
 ### 用户指定周报
 
@@ -185,6 +192,19 @@ python3 {baseDir}/scripts/fetch_news.py \
 ```
 
 输出必须是中文。英文标题和摘要需要翻译或改写为自然中文；可保留必要的英文产品名、模型名、论文名和仓库名。
+
+单条资讯默认使用信息卡格式：
+
+```markdown
+### [可点击新闻标题](https://representative-url.example)
+
+用 2-3 句话说明事件本身、关键背景和影响。  
+来源：来源名称
+
+![新闻相关配图](https://image-url.example/image.jpg)
+```
+
+标题或加粗内容必须可点击跳转到代表链接；不要输出不可点击的 `**标题**：摘要` 形式。图片来自 `image_candidates`，每条最多 1 张，只有明显相关时才插入。
 
 模板见 [output-template.md](references/output-template.md)。
 

@@ -58,6 +58,12 @@ keywords:
     - discount
 
 output:
+  detail_level: standard
+  title_links: true
+  include_images: true
+  image_mode: remote
+  max_images_per_item: 1
+  include_source_line: true
   include_stats: true
   include_failed_sources: true
   include_raw_json_path: true
@@ -87,6 +93,12 @@ output:
 | `source_weights` | map | `{}` | 来源权重，key 建议使用 OPML 中的 `text` 或 `title` |
 | `keywords.include` | string[] | `[]` | 提升排序或保留的关键词 |
 | `keywords.exclude` | string[] | `[]` | 降权或排除的关键词 |
+| `output.detail_level` | enum | `standard` | `brief`、`standard`、`detailed` |
+| `output.title_links` | bool | true | 标题是否必须链接到代表原文 |
+| `output.include_images` | bool | true | 是否允许插入新闻相关图片 |
+| `output.image_mode` | enum | `remote` | `remote`、`download`、`none`；当前默认远程图片链接 |
+| `output.max_images_per_item` | int | 1 | 每条资讯最多插入图片数 |
+| `output.include_source_line` | bool | true | 是否在条目末尾输出来源行 |
 | `output.include_stats` | bool | true | 是否输出抓取统计 |
 | `output.include_failed_sources` | bool | true | 是否列出失败信源 |
 | `output.include_raw_json_path` | bool | true | 是否在末尾记录原始 JSON 路径 |

@@ -90,6 +90,7 @@ class Item:
     canonical_url: str
     summary: str
     content_text: str | None
+    image_candidates: list[str]
     published_at: str | None
     source_name: str
     source_title: str
@@ -313,12 +314,23 @@ def parse_feed(raw: bytes, source: Source) -> list[dict[str, Any]]:
             content = ""
             if getattr(entry, "content", None):
                 content = " ".join(str(c.get("value", "")) for c in entry.content)
+            images: list[str] = []
+            for media in getattr(entry, "media_content", []) or []:
+                if isinstance(media, dict):
+                    images.append(str(media.get("url", "")))
+            for media in getattr(entry, "media_thumbnail", []) or []:
+                if isinstance(media, dict):
+                    images.append(str(media.get("url", "")))
+            for link in getattr(entry, "links", []) or []:
+                if isinstance(link, dict) and str(link.get("type", "")).startswith("image/"):
+                    images.append(str(link.get("href", "")))
             entries.append(
                 {
                     "title": getattr(entry, "title", ""),
                     "url": getattr(entry, "link", ""),
                     "summary": summary or content,
                     "published": published,
+                    "images": images,
                 }
             )
         return entries
@@ -337,6 +349,7 @@ def parse_feed_stdlib(raw: bytes, source: Source) -> list[dict[str, Any]]:
                     "url": find_text(item, ["link", "{http://purl.org/rss/1.0/modules/content/}encoded"]),
                     "summary": find_text(item, ["description", "summary"]),
                     "published": find_text(item, ["pubDate", "published", "updated"]),
+                    "images": extract_xml_image_candidates(item),
                 }
             )
         return entries
@@ -353,6 +366,7 @@ def parse_feed_stdlib(raw: bytes, source: Source) -> list[dict[str, Any]]:
                 "url": link,
                 "summary": find_text(entry, [f"{ns}summary", f"{ns}content", "summary", "content"]),
                 "published": find_text(entry, [f"{ns}published", f"{ns}updated", "published", "updated"]),
+                "images": extract_xml_image_candidates(entry),
             }
         )
     return entries
@@ -364,6 +378,25 @@ def find_text(node: ET.Element, names: Iterable[str]) -> str:
         if child is not None and child.text:
             return child.text.strip()
     return ""
+
+
+def local_name(tag: str) -> str:
+    return tag.rsplit("}", 1)[-1].lower()
+
+
+def extract_xml_image_candidates(node: ET.Element) -> list[str]:
+    images: list[str] = []
+    for child in node.iter():
+        name = local_name(child.tag)
+        attrs = {k.lower(): v for k, v in child.attrib.items()}
+        url = attrs.get("url") or attrs.get("href")
+        media_type = attrs.get("type", "")
+        if name in {"content", "thumbnail", "enclosure"} and url:
+            if media_type.startswith("image/") or is_likely_image_url(url):
+                images.append(url)
+    description = find_text(node, ["description", "summary", "{http://www.w3.org/2005/Atom}summary"])
+    images.extend(extract_image_candidates_from_html(description, base_url=""))
+    return unique_image_urls(images)
 
 
 def parse_datetime(value: str | None) -> datetime | None:
@@ -393,6 +426,56 @@ def clean_text(value: str, max_len: int = 2000) -> str:
     value = re.sub(r"(?s)<[^>]+>", " ", value)
     value = re.sub(r"\s+", " ", value).strip()
     return value[:max_len]
+
+
+def is_likely_image_url(url: str) -> bool:
+    lowered = url.lower()
+    if not lowered.startswith(("http://", "https://", "//", "/")):
+        return False
+    blocked = ("avatar", "profile_image", "logo", "icon", "emoji", "tracking", "pixel", "spacer")
+    if any(token in lowered for token in blocked):
+        return False
+    path = urllib.parse.urlsplit(url).path.lower()
+    return path.endswith((".jpg", ".jpeg", ".png", ".webp", ".gif")) or "image" in lowered
+
+
+def unique_image_urls(urls: Iterable[str]) -> list[str]:
+    seen: set[str] = set()
+    result: list[str] = []
+    for raw_url in urls:
+        url = html.unescape(str(raw_url or "")).strip()
+        if not url or not is_likely_image_url(url):
+            continue
+        key = canonicalize_url(url)
+        if key in seen:
+            continue
+        seen.add(key)
+        result.append(url)
+    return result
+
+
+def extract_image_candidates_from_html(value: str, base_url: str) -> list[str]:
+    if not value:
+        return []
+    images: list[str] = []
+    if BeautifulSoup is not None:
+        soup = BeautifulSoup(value, "html.parser")
+        for tag in soup.find_all("meta"):
+            key = (tag.get("property") or tag.get("name") or "").lower()
+            if key in {"og:image", "twitter:image", "twitter:image:src"}:
+                images.append(str(tag.get("content", "")))
+        for tag in soup.find_all("img"):
+            images.append(str(tag.get("src") or tag.get("data-src") or ""))
+    else:
+        img_matches = re.findall(r"<img\b[^>]*(?:src|data-src)=['\"]([^'\"]+)['\"]", value, flags=re.I)
+        meta_matches = re.findall(
+            r"<meta\b[^>]*(?:property|name)=['\"](?:og:image|twitter:image|twitter:image:src)['\"][^>]*content=['\"]([^'\"]+)['\"]",
+            value,
+            flags=re.I,
+        )
+        images.extend(meta_matches)
+        images.extend(img_matches)
+    return unique_image_urls(urllib.parse.urljoin(base_url, image) for image in images)
 
 
 def canonicalize_url(url: str) -> str:
@@ -453,7 +536,12 @@ def make_item(
     url = str(entry.get("url", "")).strip()
     if not title and not url:
         return None
-    summary = clean_text(str(entry.get("summary", "")), max_len=2000)
+    raw_summary = str(entry.get("summary", ""))
+    summary = clean_text(raw_summary, max_len=2000)
+    image_candidates = unique_image_urls(
+        list(entry.get("images", []) or [])
+        + extract_image_candidates_from_html(raw_summary, base_url=url)
+    )
     canonical_url = canonicalize_url(url)
     published_dt = parse_datetime(str(entry.get("published", "")))
     published_at = published_dt.isoformat() if published_dt else None
@@ -467,6 +555,7 @@ def make_item(
         canonical_url=canonical_url,
         summary=summary,
         content_text=None,
+        image_candidates=image_candidates,
         published_at=published_at,
         source_name=source.name,
         source_title=source.title,
@@ -495,14 +584,14 @@ def basic_dedupe(items: list[Item]) -> list[Item]:
     return deduped
 
 
-def fetch_article_text(
+def fetch_article_content(
     url: str,
     timeout: int,
     user_agent: str,
     insecure_skip_verify: bool,
-) -> str | None:
+) -> tuple[str | None, list[str]]:
     if not url:
-        return None
+        return None, []
     try:
         raw = fetch_url(
             url,
@@ -511,16 +600,27 @@ def fetch_article_text(
             insecure_skip_verify=insecure_skip_verify,
         )
     except Exception:
-        return None
+        return None, []
     text = raw.decode("utf-8", errors="ignore")
+    images = extract_image_candidates_from_html(text, base_url=url)
     if BeautifulSoup is not None:
         soup = BeautifulSoup(text, "html.parser")
         for tag in soup(["script", "style", "noscript"]):
             tag.decompose()
         article = soup.find("article") or soup.find("main") or soup.body
         if article is not None:
-            return clean_text(article.get_text(" "), max_len=6000)
-    return clean_text(text, max_len=6000)
+            return clean_text(article.get_text(" "), max_len=6000), images
+    return clean_text(text, max_len=6000), images
+
+
+def fetch_article_text(
+    url: str,
+    timeout: int,
+    user_agent: str,
+    insecure_skip_verify: bool,
+) -> str | None:
+    text, _ = fetch_article_content(url, timeout, user_agent, insecure_skip_verify)
+    return text
 
 
 def enrich_full_text(
@@ -536,7 +636,7 @@ def enrich_full_text(
     candidates = items if mode == "all" else sorted(items, key=lambda x: x.ai_score, reverse=True)[:top_n]
     count = 0
     for item in candidates:
-        text = fetch_article_text(
+        text, images = fetch_article_content(
             item.url,
             timeout=timeout,
             user_agent=user_agent,
@@ -544,6 +644,7 @@ def enrich_full_text(
         )
         if text:
             item.content_text = text
+            item.image_candidates = unique_image_urls(item.image_candidates + images)
             count += 1
         time.sleep(0.1)
     return count

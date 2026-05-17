@@ -22,6 +22,14 @@
       "prompt": "我想换成自己的 RSS OPML，以后默认生成 AI 日报时都用这个文件，请帮我设置 ai-news-briefing 的偏好配置。",
       "expected_output": "引导用户创建或修改 EXTEND.md，配置 source_opml、default_time_window、default_output_dir、language、fetch_full_text 等字段，而不是直接开始抓取。",
       "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "请基于 /Users/bytedance/Desktop/fc/person-project/baoyu-skills/follow.opml 生成 AI 日报。要求新闻标题本身可以点击跳转，单条资讯不要只写一句话，至少说明是什么和为什么重要；如果抓到合适图片，也插入到对应新闻下面。",
+      "expected_output": "生成 Markdown 时，每条新闻使用 `### [标题](url)` 形式，标题可点击；默认每条包含 2-3 句中文说明；如果 JSON 中有相关 image_candidates，则每条最多插入 1 张相关图片；不要输出不可点击的加粗标题列表。",
+      "files": [
+        "/Users/bytedance/Desktop/fc/person-project/baoyu-skills/follow.opml"
+      ]
     }
   ]
 }
