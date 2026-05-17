@@ -1,0 +1,27 @@
+{
+  "skill_name": "ai-news-briefing",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "请用 /Users/bytedance/Desktop/fc/person-project/baoyu-skills/follow.opml 生成今天的 AI 资讯日报，输出到 news/ 目录，要求中文、去重、按重要性排序。",
+      "expected_output": "生成一份中文 Markdown AI 日报，包含今日重点、行业动态、产品和工具、开源、融资商业、论文等分类，并说明抓取统计和失败信源。去重后同一事件只保留一个代表链接。",
+      "files": [
+        "/Users/bytedance/Desktop/fc/person-project/baoyu-skills/follow.opml"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "帮我基于 follow.opml 做一份最近 7 天的 AI 周报，英文来源也统一写成中文摘要，信息很多的话请先去重再分类。",
+      "expected_output": "生成一份最近 7 天 AI 周报，英文内容被自然改写为中文，重复事件被合并，分类清晰，重点事件排序靠前。",
+      "files": [
+        "/Users/bytedance/Desktop/fc/person-project/baoyu-skills/follow.opml"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "我想换成自己的 RSS OPML，以后默认生成 AI 日报时都用这个文件，请帮我设置 ai-news-briefing 的偏好配置。",
+      "expected_output": "引导用户创建或修改 EXTEND.md，配置 source_opml、default_time_window、default_output_dir、language、fetch_full_text 等字段，而不是直接开始抓取。",
+      "files": []
+    }
+  ]
+}
