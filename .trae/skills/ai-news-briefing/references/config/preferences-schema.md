@@ -5,13 +5,15 @@ description: EXTEND.md YAML schema for ai-news-briefing preferences
 
 # Preferences Schema
 
+默认完整配置保存在 `defaults.yaml`。`EXTEND.md` 是覆盖文件：只写需要覆盖的字段即可，未写字段从默认配置继承。
+
 ## Full Schema
 
 ```yaml
 ---
 version: 1
 
-source_opml: /path/to/follow.opml
+source_opml: references/config/default-sources.opml
 
 default_time_window: 24h
 
@@ -35,6 +37,7 @@ fetch:
   retries: 1
   retry_backoff: 1.5
   max_feed_bytes: 5000000
+  insecure_skip_verify: true
 
 categories:
   - 行业动态
@@ -75,7 +78,7 @@ output:
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
 | `version` | int | 1 | Schema version |
-| `source_opml` | string | 用户配置 | OPML 文件路径 |
+| `source_opml` | string | `references/config/default-sources.opml` | OPML 文件路径；可使用内置信源或用户自定义路径 |
 | `default_time_window` | string | `24h` | 默认时间窗口，支持 `12h`、`24h`、`7d` |
 | `default_output_dir` | string | `news` | Markdown 输出目录 |
 | `language` | enum | `zh` | 输出语言；当前默认要求中文 |
@@ -89,6 +92,7 @@ output:
 | `fetch.retries` | int | 1 | 首次失败后的重试次数 |
 | `fetch.retry_backoff` | float | 1.5 | 重试前等待秒数，按尝试次数递增 |
 | `fetch.max_feed_bytes` | int | 5000000 | 单个 RSS feed 最大压缩读取字节数 |
+| `fetch.insecure_skip_verify` | bool | true | 是否跳过 TLS 证书校验；脚本默认跳过，严格校验时传 `--verify-tls` |
 | `categories` | string[] | 5 个默认分类 | Markdown 输出分类集合 |
 | `source_weights` | map | `{}` | 来源权重，key 建议使用 OPML 中的 `text` 或 `title` |
 | `keywords.include` | string[] | `[]` | 提升排序或保留的关键词 |

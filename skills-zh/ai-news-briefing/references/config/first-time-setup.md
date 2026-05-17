@@ -34,10 +34,10 @@ Continue workflow
 header: "OPML"
 question: "默认使用哪个 OPML 信源文件？"
 options:
-  - label: "follow.opml (Recommended)"
-    description: "/Users/bytedance/Desktop/fc/person-project/baoyu-skills/follow.opml"
-  - label: "稍后配置"
-    description: "先保存为空，运行时再要求用户提供"
+  - label: "内置信源 (Recommended)"
+    description: "使用 references/config/default-sources.opml"
+  - label: "自定义 OPML"
+    description: "输入你自己的 OPML 文件路径"
 ```
 
 ### Question 2: Time Window
@@ -89,44 +89,20 @@ options:
 
 ## EXTEND.md Template
 
+默认完整配置见 `references/config/defaults.yaml`。创建 `EXTEND.md` 时只需要写入用户想覆盖的字段，不要复制整份默认配置。
+
 ```yaml
 ---
 version: 1
-source_opml: /Users/bytedance/Desktop/fc/person-project/baoyu-skills/follow.opml
+source_opml: references/config/default-sources.opml
 default_time_window: 24h
 default_output_dir: news
-language: zh
-max_items: null
-dedupe_mode: semantic
-ranking_mode: importance
-fetch_full_text: important-only
-full_text_top_n: 20
 fetch:
-  timeout: 20
-  workers: 4
-  retries: 1
-  retry_backoff: 1.5
-  max_feed_bytes: 5000000
+  insecure_skip_verify: true
 output:
   detail_level: standard
   title_links: true
   include_images: true
-  image_mode: remote
-  max_images_per_item: 1
-  include_source_line: true
-  include_stats: true
-  include_failed_sources: true
-  include_raw_json_path: true
-categories:
-  - 行业动态
-  - 产品和工具
-  - 开源
-  - 融资商业
-  - 论文
-source_weights: {}
-keywords:
-  include: []
-  exclude: []
 ---
 ```
 

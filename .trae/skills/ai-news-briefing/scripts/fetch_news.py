@@ -126,11 +126,19 @@ class FeedFetchResult:
     health: SourceHealth
 
 
+def default_opml_path() -> Path:
+    return Path(__file__).resolve().parents[1] / "references" / "config" / "default-sources.opml"
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Fetch RSS news items from OPML and output normalized JSON."
     )
-    parser.add_argument("--opml", required=True, help="Path to OPML file")
+    parser.add_argument(
+        "--opml",
+        default=str(default_opml_path()),
+        help="Path to OPML file. Defaults to bundled references/config/default-sources.opml",
+    )
     parser.add_argument("--since", default="24h", help="24h, 7d, or YYYY-MM-DD..YYYY-MM-DD")
     parser.add_argument("--output", help="Output JSON path")
     parser.add_argument(
@@ -169,7 +177,14 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--insecure-skip-verify",
         action="store_true",
-        help="Disable TLS certificate verification for corporate proxy environments",
+        default=True,
+        help="Disable TLS certificate verification. Enabled by default for RSS compatibility",
+    )
+    parser.add_argument(
+        "--verify-tls",
+        dest="insecure_skip_verify",
+        action="store_false",
+        help="Enable TLS certificate verification",
     )
     parser.add_argument("--include-keyword", action="append", default=[])
     parser.add_argument("--exclude-keyword", action="append", default=[])

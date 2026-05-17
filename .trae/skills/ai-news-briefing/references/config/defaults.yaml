@@ -1,0 +1,37 @@
+version: 1
+source_opml: references/config/default-sources.opml
+default_time_window: 24h
+default_output_dir: news
+language: zh
+max_items: null
+dedupe_mode: semantic
+ranking_mode: importance
+fetch_full_text: important-only
+full_text_top_n: 20
+fetch:
+  timeout: 20
+  workers: 4
+  retries: 1
+  retry_backoff: 1.5
+  max_feed_bytes: 5000000
+  insecure_skip_verify: true
+output:
+  detail_level: standard
+  title_links: true
+  include_images: true
+  image_mode: remote
+  max_images_per_item: 1
+  include_source_line: true
+  include_stats: true
+  include_failed_sources: true
+  include_raw_json_path: true
+categories:
+  - 行业动态
+  - 产品和工具
+  - 开源
+  - 融资商业
+  - 论文
+source_weights: {}
+keywords:
+  include: []
+  exclude: []

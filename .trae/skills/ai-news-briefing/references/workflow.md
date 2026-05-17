@@ -33,10 +33,12 @@ python3 {baseDir}/scripts/fetch_news.py \
   --output "[default_output_dir]/raw-YYYY-MM-DD.json"
 ```
 
-如果运行环境存在公司代理或自签证书导致 TLS 校验失败，可在用户知情时追加：
+如果使用内置信源，可省略 `--opml`；脚本默认读取 `references/config/default-sources.opml`。
+
+脚本默认跳过 TLS 证书校验以兼容公司代理、自签证书和部分 RSS 代理源。如果需要严格证书校验，追加：
 
 ```bash
---insecure-skip-verify
+--verify-tls
 ```
 
 脚本输出 JSON 后，先读取：
@@ -52,6 +54,7 @@ python3 {baseDir}/scripts/fetch_news.py \
 - 默认小并发 `--workers 4`，避免 RSS 代理源被高并发打爆。
 - 默认 `--timeout 20`，因为 `api.xgo.ing` 等源可能单次响应超过 5 秒。
 - 默认 `--retries 1`，单次超时只算波动，不直接判定失效。
+- 默认 `--insecure-skip-verify` 行为已开启；严格校验时使用 `--verify-tls`。
 - 排查时追加 `--progress`，可以看到 `[12/70] OK source` 形式的进度。
 - 健康报告中的 `slow` 表示成功但较慢，不等同于失败。
 

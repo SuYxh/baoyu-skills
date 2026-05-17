@@ -15,7 +15,7 @@ metadata:
 
 | 能力 | 默认行为 |
 |------|----------|
-| 信源 | 从 OPML 读取 RSS 源，默认可指向用户的 `follow.opml` |
+| 信源 | 从 OPML 读取 RSS 源，默认使用内置 `references/config/default-sources.opml`，用户可通过 `EXTEND.md` 覆盖 |
 | 时间窗口 | 最近 24 小时 |
 | 抓取方式 | 脚本抓 RSS；重要条目再抓原文补充 |
 | 去重 | 语义去重：同一事件多来源合并 |
@@ -38,7 +38,7 @@ metadata:
 - 检测到 `feedparser` 时自动增强 RSS 解析。
 - 检测到 `beautifulsoup4` 时自动增强原文正文抽取。
 - 不要求用户先安装依赖；缺失依赖时只降低解析质量，不中断主流程。
-- 公司代理或本地证书链异常时，可显式追加 `--insecure-skip-verify` 兜底；默认不要跳过证书校验。
+- RSS 抓取默认跳过 TLS 证书校验以兼容公司代理、自签证书和部分代理源；如需严格校验，显式追加 `--verify-tls`。
 
 ## 偏好设置（EXTEND.md）
 
@@ -55,45 +55,11 @@ metadata:
 | 找到 | 读取、解析并在执行前简短说明关键偏好 |
 | 未找到 | 运行 [首次设置](references/config/first-time-setup.md)，保存 `EXTEND.md` 后继续 |
 
-完整 schema 见 [preferences-schema.md](references/config/preferences-schema.md)。
+完整 schema 见 [preferences-schema.md](references/config/preferences-schema.md)。默认配置见 [defaults.yaml](references/config/defaults.yaml)，内置信源见 [default-sources.opml](references/config/default-sources.opml)。
 
 ## 默认配置
 
-```yaml
-version: 1
-source_opml: /Users/bytedance/Desktop/fc/person-project/baoyu-skills/follow.opml
-default_time_window: 24h
-default_output_dir: news
-language: zh
-max_items: null
-dedupe_mode: semantic
-ranking_mode: importance
-fetch_full_text: important-only
-full_text_top_n: 20
-fetch:
-  timeout: 20
-  workers: 4
-  retries: 1
-  retry_backoff: 1.5
-  max_feed_bytes: 5000000
-output:
-  detail_level: standard
-  title_links: true
-  include_images: true
-  image_mode: remote
-  max_images_per_item: 1
-  include_source_line: true
-categories:
-  - 行业动态
-  - 产品和工具
-  - 开源
-  - 融资商业
-  - 论文
-source_weights: {}
-keywords:
-  include: []
-  exclude: []
-```
+默认值不在 `SKILL.md` 内展开，避免多处维护。执行时以 [defaults.yaml](references/config/defaults.yaml) 为默认配置，以 [default-sources.opml](references/config/default-sources.opml) 为内置信源；用户的 `EXTEND.md` 只覆盖需要修改的字段。
 
 ## 工作流程
 
@@ -116,7 +82,6 @@ keywords:
 
 ```bash
 python3 {baseDir}/scripts/fetch_news.py \
-  --opml /Users/bytedance/Desktop/fc/person-project/baoyu-skills/follow.opml \
   --since 24h \
   --fetch-full-text important-only \
   --timeout 20 \

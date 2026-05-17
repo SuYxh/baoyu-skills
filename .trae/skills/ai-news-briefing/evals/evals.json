@@ -11,16 +11,16 @@
     },
     {
       "id": 2,
-      "prompt": "帮我基于 follow.opml 做一份最近 7 天的 AI 周报，英文来源也统一写成中文摘要，信息很多的话请先去重再分类。",
-      "expected_output": "生成一份最近 7 天 AI 周报，英文内容被自然改写为中文，重复事件被合并，分类清晰，重点事件排序靠前。",
+      "prompt": "帮我基于内置默认信源做一份最近 7 天的 AI 周报，英文来源也统一写成中文摘要，信息很多的话请先去重再分类。",
+      "expected_output": "使用 references/config/default-sources.opml 作为内置信源生成最近 7 天 AI 周报，英文内容被自然改写为中文，重复事件被合并，分类清晰，重点事件排序靠前。",
       "files": [
-        "/Users/bytedance/Desktop/fc/person-project/baoyu-skills/follow.opml"
+        "/Users/bytedance/Desktop/fc/person-project/baoyu-skills/skills-zh/ai-news-briefing/references/config/default-sources.opml"
       ]
     },
     {
       "id": 3,
       "prompt": "我想换成自己的 RSS OPML，以后默认生成 AI 日报时都用这个文件，请帮我设置 ai-news-briefing 的偏好配置。",
-      "expected_output": "引导用户创建或修改 EXTEND.md，配置 source_opml、default_time_window、default_output_dir、language、fetch_full_text 等字段，而不是直接开始抓取。",
+      "expected_output": "引导用户创建或修改 EXTEND.md，只覆盖 source_opml 等需要变更的字段；说明默认完整配置在 references/config/defaults.yaml，而不是把默认配置散落在 SKILL.md 中。",
       "files": []
     },
     {
