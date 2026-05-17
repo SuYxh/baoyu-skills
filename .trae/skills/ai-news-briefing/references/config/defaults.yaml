@@ -9,9 +9,9 @@ ranking_mode: importance
 fetch_full_text: important-only
 full_text_top_n: 20
 fetch:
-  timeout: 20
-  workers: 4
-  retries: 1
+  timeout: 30
+  workers: 10
+  retries: 3
   retry_backoff: 1.5
   max_feed_bytes: 5000000
   insecure_skip_verify: true
