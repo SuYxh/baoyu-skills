@@ -149,7 +149,7 @@ image_candidates:
 
 ## Step 7: Generate Markdown
 
-使用 `references/output-template.md`。
+使用 `templates/output-template.md`。
 
 写作规则：
 

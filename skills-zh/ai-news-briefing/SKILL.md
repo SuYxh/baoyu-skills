@@ -96,7 +96,7 @@ python3 {baseDir}/scripts/fetch_news.py \
 1. 根据 `items` 字段进行语义去重：同一事件合并为一个新闻项。
 2. 按重要性排序：多源重复、官方来源、模型/产品发布、开源项目、论文/融资优先。
 3. 归入默认 5 类。
-4. 按 [输出模板](references/output-template.md) 写入 Markdown：标题必须可点击，默认每条 2-3 句说明，可插入相关图片。
+4. 按 [输出模板](templates/output-template.md) 写入 Markdown：标题必须可点击，默认每条 2-3 句说明，可插入相关图片。
 
 ### 用户指定周报
 
@@ -171,7 +171,7 @@ python3 {baseDir}/scripts/fetch_news.py \
 
 标题或加粗内容必须可点击跳转到代表链接；不要输出不可点击的 `**标题**：摘要` 形式。图片来自 `image_candidates`，每条最多 1 张，只有明显相关时才插入。
 
-模板见 [output-template.md](references/output-template.md)。
+模板见 [output-template.md](templates/output-template.md)。
 
 ## 失败处理
 
